@@ -8,6 +8,20 @@
 
 ---
 
+## Model Parameter and Accuracy
+
+2020-04-27, Accuracy = 0.5170  
+>model = Sequential()  
+>model.add(Conv2D(25, (4, 4), input_shape=(20,15,1)))  
+>model.add(MaxPooling2D(pool_size=(2, 2)))  
+>model.add(Conv2D(50, (4, 4)))  
+>model.add(Flatten())  
+>model.add(Activation('relu'))  
+>model.add(Dense(units=4))  
+>model.compile(loss='mean_squared_error', optimizer='SGD', metrics=['accuracy'])
+
+---
+
 ## DevLog
 
 ---
