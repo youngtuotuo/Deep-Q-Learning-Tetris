@@ -1,4 +1,4 @@
-# Tetris-on-CNN
+# Stupid CNN Play Tetris
 
 .drawio files are used to draw diagram
 
