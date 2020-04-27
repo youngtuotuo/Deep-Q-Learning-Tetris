@@ -24,8 +24,6 @@
 
 ## DevLog
 
----
-
 ## 2020-04-27
 
 1. Modify the whole loop.
@@ -49,8 +47,6 @@
 5. Only one action taken still happened.
 6. Getting one response per loop seems too many.
 
----
-
 ## 2020-04-22
 
 1. The 'game &hArr; cnn' loop can run without error.
@@ -61,8 +57,6 @@
 6. Maybe collect 'NOTHING' action ?
 7. Change the frequence of collecting data.
 
----
-
 ## 2020-04-21
 
 1. Keep debuging on the keras cnn model.
@@ -71,7 +65,6 @@
 
 Make sure training properly.
 
----
 
 ## 2020-04-20
 
@@ -81,7 +74,6 @@ Successfully collect data that are desired.
 2. whether use a wrapper or just put all codes together (think the former is better)
 3. don't be afraid, just try it
 
----
 
 ## 2020-04-18
 
@@ -100,7 +92,6 @@ Collect data of each lock, then collect each 'lock data' of each clear.
 
 One game has many clear times, one clear has many lock times.
 
----
 
 ## 2020-04-17
 
@@ -111,7 +102,6 @@ Problem with collect_clear & collect_action
 
 Temporary solution: think carefully of each frame, to know where to update data.
 
----
 
 ## Earlier
 
