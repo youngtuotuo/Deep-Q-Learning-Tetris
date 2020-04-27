@@ -1,6 +1,12 @@
-# Stupid CNN Play Tetris
+# Tetris-on-CNN
 
 .drawio files are used to draw diagram
+
+## Structure
+
+![structure](cnn_tetris_algorithm.jpg)
+
+---
 
 ## DevLog
 
@@ -8,19 +14,15 @@
 
 ## 2020-04-27
 
-1. 
-
-## 2020-04-26
-
-1. Store the values, then every time we want we can train the model.  
-
-### TODO
-
 1. Modify the whole loop.
     * Begin: Generate data or train the model and watch how it performs.  
         * If generate: After gameover, ask keep generating or training the model.
         * If train: Display the amount of actions had taken. Only collect the data that get score.
 2. Create new algorithm diagram.
+
+## 2020-04-26
+
+1. Store the values, then every time we want we can train the model.  
 
 ## 2020-04-23
 
