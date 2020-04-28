@@ -30,7 +30,7 @@ colors = {'I':(34,56,68), 'S':(96,110,118), 'Z':(130,156,129), 'O':(169,161,151)
 
 '''Tindow structure'''
 tile_size = 24
-window_width, window_height = 700, 600
+window_width, window_height = 700, 700
 play_width, play_height = 360, 480
 top_x, top_y = (window_width - play_width) // 2, (window_height - play_height) // 2
 cols, rows = play_width // tile_size, play_height // tile_size
@@ -202,7 +202,7 @@ def main(wrapper, values):
         #     cnn_data.collect_action.append([NOTHING])
 
         if count_frequency == 100000:
-            count_frequency //= 100000
+            count_frequency = 1
 
         '''Update girds color'''
         for pos in tile_grid_pos(obj):
@@ -259,6 +259,8 @@ def main(wrapper, values):
                                         'UP: ' + str(values['actions'].count([UP])) + ', ' +
                                         'DOWN: ' + str(values['actions'].count([DOWN])), False, (255,0,0))
         window.blit(text_count_action, (5,25))
+        text_instacne = font.render('There are ' + str(len(store_actions)) + ' instances.', False, (255,255,255))
+        window.blit(text_instacne, (5, 45))
 
         window.blit(background, (top_x, top_y))
         pygame.display.update()
@@ -267,7 +269,7 @@ def main(wrapper, values):
             if y < 1:
                 run = False
 
-        if len(values['actions']) % 1000 == 0 and len(values['actions']) > 0:
+        if len(values['actions']) % 500 == 0 and len(values['actions']) > 0:
             run = False
     
     with open('tetris_binary_grids.py', 'w') as file:
@@ -279,7 +281,7 @@ def main(wrapper, values):
         for action in values['actions']:
             store_actions.append(action)
         file.write('store_actions = ' + str(store_actions))
-            
+    
     wrapper.gameover(values)
 
 games_count = 0
@@ -329,7 +331,7 @@ def cnn_main(wrapper,values):
         values['current_binary'] = binary_grids
         response = wrapper.control(values)
         if response == RIGHT:
-            if count_frequency % 500 == 0:
+            if count_frequency % 30 == 0:
                 obj.x += tile_size
                 cnn_data.collect_binary.append(binary_grids)
                 cnn_data.collect_action.append([RIGHT])
@@ -337,7 +339,7 @@ def cnn_main(wrapper,values):
                     obj.x -= tile_size
 
         elif response == LEFT:
-            if count_frequency % 500 == 0:
+            if count_frequency % 30 == 0:
                 obj.x -= tile_size
                 cnn_data.collect_binary.append(binary_grids)
                 cnn_data.collect_action.append([LEFT])
@@ -345,7 +347,7 @@ def cnn_main(wrapper,values):
                     obj.x += tile_size
 
         elif response == DOWN:
-            if count_frequency % 500 == 0:
+            if count_frequency % 30 == 0:
                 obj.y += tile_size
                 cnn_data.collect_binary.append(binary_grids)
                 cnn_data.collect_action.append([DOWN])
@@ -353,7 +355,7 @@ def cnn_main(wrapper,values):
                     obj.y -= tile_size
 
         elif response == UP:
-            if count_frequency % 500 == 0:
+            if count_frequency % 30 == 0:
                 obj.rotate += 1
                 obj.rotate %= len(obj.tile)
                 cnn_data.collect_binary.append(binary_grids)
@@ -366,9 +368,9 @@ def cnn_main(wrapper,values):
         #         cnn_data.collect_binary.append(binary_grids)
         #         cnn_data.collect_action.append([NOTHING])
         
-        # count_frequency += 1
-        # if count_frequency == 100000:
-        #     count_frequency = 1
+        count_frequency += 1
+        if count_frequency == 100000:
+            count_frequency = 1
 
         # elif response == SPACE:
         #     cnn_data.collect_binary.append(binary_grids)
@@ -444,6 +446,8 @@ def cnn_main(wrapper,values):
                                         'UP: ' + str(values['actions'].count([UP])) + ', ' +
                                         'DOWN: ' + str(values['actions'].count([DOWN])), False, (255,255,255))
         window.blit(text_count_action, (5,25))
+        text_instacne = font.render('There are ' + str(len(store_actions)) + ' instances.', False, (255,255,255))
+        window.blit(text_instacne, (5,45))
 
         window.blit(background, (top_x, top_y))
         pygame.display.update()

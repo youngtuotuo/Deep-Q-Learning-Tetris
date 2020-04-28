@@ -24,13 +24,13 @@ model.add(Conv2D(25, (4, 4), input_shape=(20,15,1)))
 # 2x2 max pooling, 2x2 is randomly chosen
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Conv2D(50, (4, 4)))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+# model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
-model.add(Activation('softmax'))
-model.add(Dense(units=10))
-model.add(Activation('softmax'))
+model.add(Activation('relu'))
+# model.add(Dense(units=10))
+# model.add(Activation('softmax'))
 model.add(Dense(units=4))
-model.compile(loss='mean_squared_error', optimizer='adagrad', metrics=['accuracy'])
+model.compile(loss='mean_squared_error', optimizer='SGD', metrics=['accuracy'])
 
 
 class Wrapper():
@@ -41,8 +41,10 @@ class Wrapper():
 			font = pygame.font.SysFont('Jetbrains Mono', 30)
 			text1 = font.render('Press G for generating data.', False, (255,255,255))
 			text2 = font.render('Press T for training model and predict.', False, (255,255,255))
+			text3 = font.render('There are ' + str(len(store_actions)) + ' instances.', False, (255,255,255))
 			window.blit(text1, (100, 200))
 			window.blit(text2, (100, 300))
+			window.blit(text3, (100, 400))
 			pygame.display.update()
 			for event in pygame.event.get():
 				if event.type == QUIT:
@@ -54,7 +56,7 @@ class Wrapper():
 					if event.key == K_t:
 						x_train = np.array(store_grids)
 						y_train = to_categorical(store_actions)
-						model.fit(x_train, y_train, shuffle=True, epochs=10, verbose=1)
+						model.fit(x_train, y_train, shuffle=True, epochs=20, verbose=1)
 						cnn_main(self, values)
 					if event.key == K_ESCAPE:
 						pygame.quit()
@@ -78,12 +80,14 @@ class Wrapper():
 	def gameover(self, values):
 		global model
 		while True:
-			window.filee((0,0,0))
+			window.fill((0,0,0))
 			font = pygame.font.SysFont('Jetbrains Mono', 30)
 			text1 = font.render('Press G for generating data.', False, (255,255,255))
 			text2 = font.render('Press T for training model and predict.', False, (255,255,255))
+			text3 = font.render('There are ' + str(len(store_actions)) + ' instances.', False, (255,255,255))
 			window.blit(text1, (120, 200))
 			window.blit(text2, (120, 300))
+			window.blit(text3, (120, 400))
 			pygame.display.update()
 			for event in pygame.event.get():
 				if event.type == QUIT:
@@ -96,7 +100,7 @@ class Wrapper():
 						if values['score'] > 0:	
 							x_train = np.array(store_grids)
 							y_train = to_categorical(store_actions)
-							model.fit(x_train, y_train, shuffle=True, epochs=10, verbose=1)
+							model.fit(x_train, y_train, shuffle=True, epochs=20, verbose=1)
 						cnn_main(self, values)
 					if event.key == K_ESCAPE:
 						pygame.quit()
