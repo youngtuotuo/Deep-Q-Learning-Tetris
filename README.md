@@ -6,11 +6,10 @@
 
 ![structure](cnn_tetris_algorithm.jpg)
 
----
-
 ## Model Parameter and Accuracy
 
 2020-04-27, Accuracy = 0.5170, 3729 training instances  
+2020-04-28, Accuracy = 0.5496, 9098 training instances  
 >model = Sequential()  
 >model.add(Conv2D(25, (4, 4), input_shape=(20,15,1)))  
 >model.add(MaxPooling2D(pool_size=(2, 2)))  
@@ -20,9 +19,13 @@
 >model.add(Dense(units=4))  
 >model.compile(loss='mean_squared_error', optimizer='SGD', metrics=['accuracy'])
 
----
-
 ## DevLog
+
+## 2020-04-28
+
+### TODO
+
+1. Use GCP to train.
 
 ## 2020-04-27
 
@@ -65,7 +68,6 @@
 
 Make sure training properly.
 
-
 ## 2020-04-20
 
 Successfully collect data that are desired.
@@ -73,7 +75,6 @@ Successfully collect data that are desired.
 1. feed data into cnn
 2. whether use a wrapper or just put all codes together (think the former is better)
 3. don't be afraid, just try it
-
 
 ## 2020-04-18
 
@@ -92,7 +93,6 @@ Collect data of each lock, then collect each 'lock data' of each clear.
 
 One game has many clear times, one clear has many lock times.
 
-
 ## 2020-04-17
 
 Problem with collect_clear & collect_action
@@ -101,7 +101,6 @@ Problem with collect_clear & collect_action
 2. collect_action: will be all space control (i.e. 4)
 
 Temporary solution: think carefully of each frame, to know where to update data.
-
 
 ## Earlier
 
