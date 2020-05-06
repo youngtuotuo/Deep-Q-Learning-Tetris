@@ -1,6 +1,7 @@
 # Tetris-on-CNN
 
-.drawio files are used to draw diagram
+.drawio files are used to draw diagram  
+Run cnn_tetris.py to begin.
 
 ## Structure
 
