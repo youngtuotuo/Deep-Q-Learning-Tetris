@@ -85,7 +85,6 @@ def tile_grid_pos(obj:Tile) -> list:
 
 values = {'binary_grids':[], 'actions':[], 'score':[], 'current_binary':[]}
 RIGHT, LEFT, UP, DOWN, NOTHING = 0, 1, 2, 3, 4
-cnn_data = data()
 
 def main(wrapper, values):
     global tile_size, top_x, top_y, play_height, play_width, grids_color
@@ -100,6 +99,7 @@ def main(wrapper, values):
     speed_data = 180
     score = 0
     count_frequency = 0
+    cnn_data = data()
     while run:
         clock.tick()
         time += clock.get_rawtime()
@@ -197,9 +197,6 @@ def main(wrapper, values):
 
             
         count_frequency += 1
-        # if count_frequency % 500 == 0:
-        #     cnn_data.collect_binary.append(binary_grids)
-        #     cnn_data.collect_action.append([NOTHING])
 
         if count_frequency == 100000:
             count_frequency = 1
@@ -299,6 +296,7 @@ def cnn_main(wrapper,values):
     speed_data = 180
     score = 0
     count_frequency = 0
+    cnn_data = data()
     while run:
         clock.tick()
         time += clock.get_rawtime()
