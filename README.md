@@ -1,7 +1,6 @@
 # Tetris-on-CNN
 
-.drawio files are used to draw diagram  
-Run __tetris_cnn.py__ to begin.
+.drawio files are used to draw diagram
 
 ## Structure
 
@@ -9,17 +8,17 @@ Run __tetris_cnn.py__ to begin.
 
 ## Model Parameter and Accuracy
 2020-05-06, Accuracy = 0.8246, 1990 training instacnes
->model = Sequential()  
->model.add(Conv2D(60, (4, 4), input_shape=(20,15,1), activation='relu'))  
->model.add(MaxPooling2D((2,2)))  
->model.add(Conv2D(50, (4,4), activation='relu'))  
->model.add(MaxPooling2D((2,2)))  
->model.add(Flatten())  
->model.add(Activation('relu'))  
->model.add(Dense(100, activation='relu'))  
->model.add(Dense(100, activation='relu'))  
->model.add(Dense(4, activation='relu'))  
->model.compile(loss='mean_squared_error', optimizer='RMSprop', metrics=['accuracy'])  
+>model = Sequential()
+>model.add(Conv2D(60, (4, 4), input_shape=(20,15,1), activation='relu'))
+>model.add(MaxPooling2D((2,2)))
+>model.add(Conv2D(50, (4,4), activation='relu'))
+>model.add(MaxPooling2D((2,2)))
+>model.add(Flatten())
+>model.add(Activation('relu'))
+>model.add(Dense(100, activation='relu'))
+>model.add(Dense(100, activation='relu'))
+>model.add(Dense(4, activation='relu'))
+>model.compile(loss='mean_squared_error', optimizer='RMSprop', metrics=['accuracy'])
 
 2020-04-27, Accuracy = 0.5170, 3729 training instances  
 2020-04-28, Accuracy = 0.5496, 9098 training instances  
