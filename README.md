@@ -1,6 +1,9 @@
 # Tetris-on-CNN
 
-.drawio files are used to draw diagram
+.drawio files are used to draw diagram  
+pygame 1.9.6  
+numpy 1.17.4  
+Keras 2.3.1  
 
 ## Structure
 
