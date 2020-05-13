@@ -10,7 +10,7 @@ Keras 2.3.1
 ![structure](cnn_tetris_algorithm.jpg)
 
 ## Model Parameter and Accuracy
-2020-05-11, validation_split=0.1, val-accuracy=0.57, 79774 instances  
+2020-05-11, validation_split=0.1, val-accuracy=0.57, 6216 instances  
 
 2020-05-06, Accuracy = 0.8246, 1990 training instacnes
 >model = Sequential()
