@@ -13,17 +13,17 @@ Keras 2.3.1
 2020-05-11, validation_split=0.1, val-accuracy=0.57, 6216 instances  
 
 2020-05-06, Accuracy = 0.8246, 1990 training instacnes
->model = Sequential()
->model.add(Conv2D(60, (4, 4), input_shape=(20,15,1), activation='relu'))
->model.add(MaxPooling2D((2,2)))
->model.add(Conv2D(50, (4,4), activation='relu'))
->model.add(MaxPooling2D((2,2)))
->model.add(Flatten())
->model.add(Activation('relu'))
->model.add(Dense(100, activation='relu'))
->model.add(Dense(100, activation='relu'))
->model.add(Dense(4, activation='relu'))
->model.compile(loss='mean_squared_error', optimizer='RMSprop', metrics=['accuracy'])
+>model = Sequential()  
+>model.add(Conv2D(60, (4, 4), input_shape=(20,15,1), activation='relu'))  
+>model.add(MaxPooling2D((2,2)))  
+>model.add(Conv2D(50, (4,4), activation='relu'))  
+>model.add(MaxPooling2D((2,2)))  
+>model.add(Flatten())  
+>model.add(Activation('relu'))  
+>model.add(Dense(100, activation='relu'))  
+>model.add(Dense(100, activation='relu'))  
+>model.add(Dense(4, activation='relu'))  
+>model.compile(loss='mean_squared_error', optimizer='RMSprop', metrics=['accuracy'])  
 
 2020-04-27, Accuracy = 0.5170, 3729 training instances  
 2020-04-28, Accuracy = 0.5496, 9098 training instances  
