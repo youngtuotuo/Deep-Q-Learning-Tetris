@@ -60,9 +60,9 @@ Keras 2.3.1
 
 1. Balance the number of each action, need to avoid some has too many.
 2. Try another structure of cnn.
-3. Change optimizer and loss function let tiles took multiple actions.  
+3. Change optimizer and loss function successfully let tiles took multiple actions.  
     * optimizer: __adam &rArr; adagrad__  
-    * loss: __categorical_crossentropy &rArr; mean_square_error__  
+    * loss: __categorical_crossentropy &rArr; mean_square_error__  (This looks illogical, though.)
 4. Change the frequency of taking actions in cnn_main.
 5. Only one action taken still happened.
 6. Getting one response per loop seems too many.
