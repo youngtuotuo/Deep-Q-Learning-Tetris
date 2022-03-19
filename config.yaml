@@ -5,3 +5,5 @@ window:
 play:
   width: 360
   height: 480
+speed: 180
+
