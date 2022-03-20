@@ -6,7 +6,6 @@ window_height = 700
 
 play_width = tile_size * cols
 play_height = tile_size * rows
-start_x = cols // 2 - 1
 
 fall_speed = 180
 

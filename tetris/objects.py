@@ -1,8 +1,8 @@
 import pygame
 import sys
-from pygame import QUIT, KEYDOWN, K_ESCAPE, K_q, K_ESCAPE, K_p
+from pygame import QUIT, KEYDOWN, K_ESCAPE, K_q, K_p
 import random
-from tetris.constants import tile_size, start_x, window_width, rows, cols,\
+from tetris.constants import tile_size, window_width, rows, cols,\
     window_height, play_width, play_height, tl_x, tl_y
 
 
@@ -21,18 +21,18 @@ class Tile(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self.x = start_x
+        self.x = 0  # TODO: use random to start x position
         self.y = 0
         self.name = random.choice(['I', 'S', 'Z', 'O', 'T', 'J', 'L'])
         self.data = getattr(self, self.name)
-        self.rotate = 0
+        self.rotate_order = 0
         self.locked = False
 
     def pos(self):
         """Position of grids.
         """
         structure = self.data.get('structure')
-        structure = structure[self.rotate % len(structure)]
+        structure = structure[self.rotate_order % len(structure)]
         pos = []
         for num in structure:
             if num // 4 == 0:
@@ -44,6 +44,11 @@ class Tile(object):
             elif num // 4 == 3:
                 pos.append((self.x + (num % 4), self.y + 3))
         return pos
+
+    def roate(self):
+        # TODO: rotation method here or in Tetris object
+        self.rotate_order += 1
+        self.rotate_order %= len(self.data.get('structure'))
 
     @property
     def I(self):
@@ -111,27 +116,34 @@ class Tetris(object):
         self.pause = False
 
     def update(self):
+        """Update game states.
+        """
         pass
 
     def get_new_tile(self):
         self.tile = Tile()
 
     def display(self):
-        """Display the game window
+        """Display the game window.
         """
+        # TODO: render tiles
         self.render_grids()
         self.window.blit(self.playground, (tl_x, tl_y))
         pygame.display.update()
 
     def render_grids(self):
-        # for col in range(1, cols):
-        #     pass
-        print(tl_x, tl_y)
         for row in range(1, rows):
+            y = tile_size * row
             pygame.draw.line(
-                self.playground, color=(80, 80, 80),
-                start_pos=(tl_x, tl_y),
-                end_pos=(tl_x + play_width, tl_y + tile_size * row))
+                self.playground, color=(100, 100, 100),
+                start_pos=(0, y),
+                end_pos=(play_width, y))
+        for col in range(1, cols):
+            x = tile_size * col
+            pygame.draw.line(
+                self.playground, color=(100, 100, 100),
+                start_pos=(x, 0),
+                end_pos=(x, play_height))
 
     def pause_game(self):
         self.pause = True
@@ -150,12 +162,13 @@ class Tetris(object):
         pygame.quit()
         sys.exit()
 
-    def listen_event(self):
+    def control(self):
         """Main keyboard listen method.
         q, esc -> quit
         arrow keys -> control
         space -> lock to bottom
         """
+        # TODO: control
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.run = False

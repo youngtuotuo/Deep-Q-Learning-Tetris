@@ -4,7 +4,7 @@ from tetris.objects import Tetris
 def main():
     tetris = Tetris()
     while tetris.run:
-        tetris.listen_event()
+        tetris.control()
         tetris.display()
     tetris.quit()
 
