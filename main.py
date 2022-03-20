@@ -1,11 +1,13 @@
-import yaml
-import sys
+from tetris.objects import Tetris
 
 
-def main(config):
-    with open(config, 'r') as f:
-        params = yaml.safe_load(f)
+def main():
+    tetris = Tetris()
+    while tetris.run:
+        tetris.listen_event()
+        tetris.display()
+    tetris.quit()
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main()

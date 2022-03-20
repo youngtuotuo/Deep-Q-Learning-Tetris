@@ -1,5 +1,9 @@
 import pygame
+import sys
+from pygame import QUIT, KEYDOWN, K_ESCAPE, K_q, K_ESCAPE, K_p
 import random
+from tetris.constants import tile_size, start_x, window_width, rows, cols,\
+    window_height, play_width, play_height, tl_x, tl_y
 
 
 class Tile(object):
@@ -91,35 +95,73 @@ class Tile(object):
         }
 
 
-class Teris(object):
+class Tetris(object):
     """Setup basic windows
     """
 
     def __init__(self, *args, **kwargs) -> None:
         pygame.init()
-        self.load_params(kwargs)
-        self.window = pygame.display.set_mode(
-            kwargs['window']['width'], kwargs['window']['height'])
-        self.background = pygame.Surface(
-            self.play_width, self.play_width)
-        self.background.fill((255, 255, 255))
-        self.grids_color = [[(255, 255, 255) for _ in range(self.cols)]
-                            for _ in range(self.rows)]
-        self.tile = Tile(self.tile_size, self.play_width)
+        self.window = pygame.display.set_mode((window_width, window_height))
+        self.window.fill((0, 0, 0))
+        self.playground = pygame.Surface((play_width, play_height))
+        self.playground.fill((255, 255, 255))
+        self.tile = Tile()
         self.clock = pygame.time.Clock()
+        self.run = True
+        self.pause = False
 
-    def update(self, tile):
+    def update(self):
         pass
 
     def get_new_tile(self):
-        self.tile = Tile(self.start_x)
+        self.tile = Tile()
 
-    def load_params(self, **kwargs):
-        self.tile_size = kwargs['tile_size']
-        self.play_width = kwargs['play']['width']
-        self.play_height = kwargs['play']['height']
-        self.top_x = (kwargs['window']['width'] - self.play_width) // 2
-        self.top_y = (kwargs['window']['height'] - self.play_height) // 2
-        self.cols = self.play_width // self.tile_size
-        self.rows = self.play_height // self.tile_size
-        self.start_x = self.play_width // self.tile_size // 2 - 1
+    def display(self):
+        """Display the game window
+        """
+        self.render_grids()
+        self.window.blit(self.playground, (tl_x, tl_y))
+        pygame.display.update()
+
+    def render_grids(self):
+        # for col in range(1, cols):
+        #     pass
+        print(tl_x, tl_y)
+        for row in range(1, rows):
+            pygame.draw.line(
+                self.playground, color=(80, 80, 80),
+                start_pos=(tl_x, tl_y),
+                end_pos=(tl_x + play_width, tl_y + tile_size * row))
+
+    def pause_game(self):
+        self.pause = True
+        while self.pause:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    self.run = False
+                if event.type == KEYDOWN:
+                    key = event.key
+                    if key == K_p:
+                        self.pause = False
+                    if key == K_ESCAPE or key == K_q:
+                        self.run = False
+
+    def quit(self):
+        pygame.quit()
+        sys.exit()
+
+    def listen_event(self):
+        """Main keyboard listen method.
+        q, esc -> quit
+        arrow keys -> control
+        space -> lock to bottom
+        """
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                self.run = False
+            if event.type == KEYDOWN:
+                key = event.key
+                if key == K_ESCAPE or key == K_q:
+                    self.run = False
+                if key == K_p:
+                    self.pause_game()

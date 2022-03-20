@@ -1,6 +1,8 @@
 import yaml
 import sys
 
+# TODO test todo
+
 
 def test_config(config='config.yaml'):
     with open(config, 'r') as f:
