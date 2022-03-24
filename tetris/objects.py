@@ -1,6 +1,6 @@
 import pygame
 import sys
-from pygame import QUIT, KEYDOWN, K_ESCAPE, K_q, K_p, K_DOWN, K_UP, K_RIGHT, K_LEFT
+from pygame import QUIT, KEYDOWN, K_ESCAPE, K_q, K_p, K_n, K_DOWN, K_UP, K_RIGHT, K_LEFT
 import random
 from tetris.constants import (
     tile_size,
@@ -13,7 +13,7 @@ from tetris.constants import (
     tl_x,
     tl_y,
     fall_speed,
-    control_threshold
+    control_threshold,
 )
 
 
@@ -38,6 +38,12 @@ class Tile(object):
         self.data = getattr(self, self.name)
         self.rotate_order = 0
         self.locked = False
+        self.control_events_map = {
+            K_UP: self.rotate,
+            K_DOWN: self.down,
+            K_LEFT: self.left,
+            K_RIGHT: self.right,
+        }
 
     @property
     def pos(self):
@@ -119,16 +125,11 @@ class Tetris(object):
         self.window.fill((0, 0, 0))
         self.playground = pygame.Surface((play_width, play_height))
         self.tile = Tile()
+        # NOTE: Remember to remove L
         self.tile.data = self.tile.L
         self.clock = pygame.time.Clock()
         self.time = 0
         self.control_tick = 0
-        self.control_events_map = {
-                K_UP: getattr(self.tile, 'rotate'),
-                K_DOWN: getattr(self.tile, 'down'),
-                K_LEFT: getattr(self.tile, 'left'),
-                K_RIGHT: getattr(self.tile, 'right')
-            }
         self.run = True
         self.pause = False
 
@@ -139,7 +140,6 @@ class Tetris(object):
         space -> lock to bottom
         """
         # TODO: feasible tile region
-
         self.tile_fall(fall_speed)
         self.single_key_down_detection()
         self.repeat_keys_detection()
@@ -149,7 +149,6 @@ class Tetris(object):
 
     def display(self):
         """Display the game window."""
-        # TODO: render tiles
         self.playground.fill((255, 255, 255))
         self.render_tile()
         self.render_grids()
@@ -225,14 +224,17 @@ class Tetris(object):
                 self.run = False
             if event.key == K_p:
                 self.pause_game()
-            if event.key in self.control_events_map:
+            if event.key == K_n:
+                self.get_new_tile()
+            if event.key in self.tile.control_events_map:
                 self.control_tick = 0
-                self.control_events_map[event.key]()
+                self.tile.control_events_map[event.key]()
 
     def repeat_keys_detection(self):
         """Detect repeat key press"""
         keys = pygame.key.get_pressed()
-        for event in self.control_events_map:
+        for event in self.tile.control_events_map:
             if keys[event]:
-                self.trigger_movement(self.control_events_map[event])
+                self.trigger_movement(self.tile.control_events_map[event])
+                # the following break make sure trigger only one repeat key press
                 break
