@@ -12,6 +12,8 @@ from tetris.constants import (
     play_height,
     tl_x,
     tl_y,
+    fall_speed,
+    control_threshold
 )
 
 
@@ -30,7 +32,7 @@ class Tile(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self.x = 7  # TODO: use random to start x position
+        self.x = cols // 2  # TODO: use random to start x position
         self.y = 0
         self.name = random.choice(["I", "S", "Z", "O", "T", "J", "L"])
         self.data = getattr(self, self.name)
@@ -54,10 +56,21 @@ class Tile(object):
                 pos.append((self.x + (num % 4), self.y + 3))
         return pos
 
-    def roate(self):
-        # TODO: rotation method here or in Tetris object
+    def rotate(self):
         self.rotate_order += 1
         self.rotate_order %= len(self.data.get("structure"))
+
+    def down(self):
+        if self.y < rows:
+            self.y += 1
+
+    def right(self):
+        if self.x < cols:
+            self.x += 1
+
+    def left(self):
+        if self.x > 0:
+            self.x -= 1
 
     @property
     def I(self):
@@ -98,23 +111,38 @@ class Tile(object):
 
 
 class Tetris(object):
-    """Setup basic windows"""
+    """Main Tetris Game."""
 
     def __init__(self, *args, **kwargs) -> None:
         pygame.init()
-        pygame.key.set_repeat(1, 95)
         self.window = pygame.display.set_mode((window_width, window_height))
         self.window.fill((0, 0, 0))
         self.playground = pygame.Surface((play_width, play_height))
-        self.playground.fill((255, 255, 255))
         self.tile = Tile()
+        self.tile.data = self.tile.L
         self.clock = pygame.time.Clock()
+        self.time = 0
+        self.control_tick = 0
+        self.control_events_map = {
+                K_UP: getattr(self.tile, 'rotate'),
+                K_DOWN: getattr(self.tile, 'down'),
+                K_LEFT: getattr(self.tile, 'left'),
+                K_RIGHT: getattr(self.tile, 'right')
+            }
         self.run = True
         self.pause = False
 
-    def update(self):
-        """Update game states."""
-        pass
+    def control(self):
+        """Main keyboard listen method.
+        q, esc -> quit
+        arrow keys -> control
+        space -> lock to bottom
+        """
+        # TODO: feasible tile region
+
+        self.tile_fall(fall_speed)
+        self.single_key_down_detection()
+        self.repeat_keys_detection()
 
     def get_new_tile(self):
         self.tile = Tile()
@@ -129,9 +157,14 @@ class Tetris(object):
         pygame.display.update()
 
     def render_tile(self):
-        color = self.tile.data.get('color')
+        color = self.tile.data.get("color")
         for col, row in self.tile.pos:
-            pygame.draw.rect(self.playground, color, ((col - 1) * tile_size, row * tile_size, tile_size, tile_size), 0)
+            pygame.draw.rect(
+                self.playground,
+                color,
+                (col * tile_size, row * tile_size, tile_size, tile_size),
+                0,
+            )
 
     def render_grids(self):
         for row in range(1, rows):
@@ -168,31 +201,38 @@ class Tetris(object):
         pygame.quit()
         sys.exit()
 
-    def control(self):
-        """Main keyboard listen method.
-        q, esc -> quit
-        arrow keys -> control
-        space -> lock to bottom
-        """
-        # TODO: control
-        for event in pygame.event.get():
-            if event.type == QUIT:
+    def trigger_movement(self, func):
+        self.control_tick += 1
+        if self.control_tick > control_threshold:
+            self.control_tick = 0
+            func()
+
+    def tile_fall(self, fall_speed):
+        self.clock.tick()
+        self.time += self.clock.get_rawtime()
+        if self.time > fall_speed:
+            self.time = 0
+            # self.tile.y += 1
+
+    def single_key_down_detection(self):
+        """Detect single key press"""
+        if pygame.event.get(QUIT):
+            self.run = False
+        # for single key down press
+        events = pygame.event.get(KEYDOWN)
+        for event in events:
+            if event.key == K_ESCAPE or event.key == K_q:
                 self.run = False
-            if event.type == KEYDOWN:
-                key = event.key
-                if key == K_ESCAPE or key == K_q:
-                    self.run = False
-                if key == K_p:
-                    self.pause_game()
-                if key == K_DOWN:
-                    if self.tile.y < rows:
-                        self.tile.y += 1
-                elif key == K_UP:
-                    if self.tile.y > 0:
-                        self.tile.y -= 1
-                elif key == K_RIGHT:
-                    if self.tile.x < cols:
-                        self.tile.x += 1
-                elif key == K_LEFT:
-                    if self.tile.x > 0:
-                        self.tile.x -= 1
+            if event.key == K_p:
+                self.pause_game()
+            if event.key in self.control_events_map:
+                self.control_tick = 0
+                self.control_events_map[event.key]()
+
+    def repeat_keys_detection(self):
+        """Detect repeat key press"""
+        keys = pygame.key.get_pressed()
+        for event in self.control_events_map:
+            if keys[event]:
+                self.trigger_movement(self.control_events_map[event])
+                break
