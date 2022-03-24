@@ -1,9 +1,18 @@
 import pygame
 import sys
-from pygame import QUIT, KEYDOWN, K_ESCAPE, K_q, K_p
+from pygame import QUIT, KEYDOWN, K_ESCAPE, K_q, K_p, K_DOWN, K_UP, K_RIGHT, K_LEFT
 import random
-from tetris.constants import tile_size, window_width, rows, cols,\
-    window_height, play_width, play_height, tl_x, tl_y
+from tetris.constants import (
+    tile_size,
+    window_width,
+    rows,
+    cols,
+    window_height,
+    play_width,
+    play_height,
+    tl_x,
+    tl_y,
+)
 
 
 class Tile(object):
@@ -21,17 +30,17 @@ class Tile(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self.x = 0  # TODO: use random to start x position
+        self.x = 7  # TODO: use random to start x position
         self.y = 0
-        self.name = random.choice(['I', 'S', 'Z', 'O', 'T', 'J', 'L'])
+        self.name = random.choice(["I", "S", "Z", "O", "T", "J", "L"])
         self.data = getattr(self, self.name)
         self.rotate_order = 0
         self.locked = False
 
+    @property
     def pos(self):
-        """Position of grids.
-        """
-        structure = self.data.get('structure')
+        """Position of grids."""
+        structure = self.data.get("structure")
         structure = structure[self.rotate_order % len(structure)]
         pos = []
         for num in structure:
@@ -48,64 +57,52 @@ class Tile(object):
     def roate(self):
         # TODO: rotation method here or in Tetris object
         self.rotate_order += 1
-        self.rotate_order %= len(self.data.get('structure'))
+        self.rotate_order %= len(self.data.get("structure"))
 
     @property
     def I(self):
-        return {
-            'structure': [(0, 1, 2, 3), (1, 5, 9, 13)],
-            'color': (34, 56, 68)
-        }
+        return {"structure": [(0, 1, 2, 3), (1, 5, 9, 13)], "color": (34, 56, 68)}
 
     @property
     def S(self):
-        return {
-            'structure': [(1, 5, 6, 10), (1, 2, 4, 5)],
-            'color': (96, 110, 118)
-        }
+        return {"structure": [(1, 5, 6, 10), (1, 2, 4, 5)], "color": (96, 110, 118)}
 
     @property
     def Z(self):
-        return {
-            'structure': [(2, 5, 6, 9), (0, 1, 5, 6)],
-            'color': (130, 156, 129)
-        }
+        return {"structure": [(2, 5, 6, 9), (0, 1, 5, 6)], "color": (130, 156, 129)}
 
     @property
     def O(self):
-        return {'structure': [(0, 1, 4, 5)], 'color': (169, 161, 151)}
+        return {"structure": [(0, 1, 4, 5)], "color": (169, 161, 151)}
 
     @property
     def T(self):
         return {
-            'structure': [(1, 4, 5, 6), (1, 5, 6, 9), (4, 5, 6, 9),
-                          (1, 4, 5, 9)],
-            'color': (200, 162, 166)
+            "structure": [(1, 4, 5, 6), (1, 5, 6, 9), (4, 5, 6, 9), (1, 4, 5, 9)],
+            "color": (200, 162, 166),
         }
 
     @property
     def J(self):
         return {
-            'structure': [(1, 5, 8, 9), (0, 4, 5, 6), (1, 2, 5, 9),
-                          (4, 5, 6, 10)],
-            'color': (152, 147, 176)
+            "structure": [(1, 5, 8, 9), (0, 4, 5, 6), (1, 2, 5, 9), (4, 5, 6, 10)],
+            "color": (152, 147, 176),
         }
 
     @property
     def L(self):
         return {
-            'structure': [(0, 4, 8, 9), (4, 5, 6, 8), (0, 1, 5, 9),
-                          (6, 8, 9, 10)],
-            'color': (151, 165, 198)
+            "structure": [(0, 4, 8, 9), (4, 5, 6, 8), (0, 1, 5, 9), (6, 8, 9, 10)],
+            "color": (151, 165, 198),
         }
 
 
 class Tetris(object):
-    """Setup basic windows
-    """
+    """Setup basic windows"""
 
     def __init__(self, *args, **kwargs) -> None:
         pygame.init()
+        pygame.key.set_repeat(1, 95)
         self.window = pygame.display.set_mode((window_width, window_height))
         self.window.fill((0, 0, 0))
         self.playground = pygame.Surface((play_width, play_height))
@@ -116,34 +113,43 @@ class Tetris(object):
         self.pause = False
 
     def update(self):
-        """Update game states.
-        """
+        """Update game states."""
         pass
 
     def get_new_tile(self):
         self.tile = Tile()
 
     def display(self):
-        """Display the game window.
-        """
+        """Display the game window."""
         # TODO: render tiles
+        self.playground.fill((255, 255, 255))
+        self.render_tile()
         self.render_grids()
         self.window.blit(self.playground, (tl_x, tl_y))
         pygame.display.update()
+
+    def render_tile(self):
+        color = self.tile.data.get('color')
+        for col, row in self.tile.pos:
+            pygame.draw.rect(self.playground, color, ((col - 1) * tile_size, row * tile_size, tile_size, tile_size), 0)
 
     def render_grids(self):
         for row in range(1, rows):
             y = tile_size * row
             pygame.draw.line(
-                self.playground, color=(100, 100, 100),
+                self.playground,
+                color=(100, 100, 100),
                 start_pos=(0, y),
-                end_pos=(play_width, y))
+                end_pos=(play_width, y),
+            )
         for col in range(1, cols):
             x = tile_size * col
             pygame.draw.line(
-                self.playground, color=(100, 100, 100),
+                self.playground,
+                color=(100, 100, 100),
                 start_pos=(x, 0),
-                end_pos=(x, play_height))
+                end_pos=(x, play_height),
+            )
 
     def pause_game(self):
         self.pause = True
@@ -178,3 +184,15 @@ class Tetris(object):
                     self.run = False
                 if key == K_p:
                     self.pause_game()
+                if key == K_DOWN:
+                    if self.tile.y < rows:
+                        self.tile.y += 1
+                elif key == K_UP:
+                    if self.tile.y > 0:
+                        self.tile.y -= 1
+                elif key == K_RIGHT:
+                    if self.tile.x < cols:
+                        self.tile.x += 1
+                elif key == K_LEFT:
+                    if self.tile.x > 0:
+                        self.tile.x -= 1
