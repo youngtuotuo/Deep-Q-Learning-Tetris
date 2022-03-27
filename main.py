@@ -1,11 +1,10 @@
-from tetris.objects import Tetris
+from tetris.game import Tetris
 
 
 def main():
     tetris = Tetris()
     while tetris.run:
-        tetris.control()
-        tetris.display()
+        tetris.play()
     tetris.quit()
 
 
