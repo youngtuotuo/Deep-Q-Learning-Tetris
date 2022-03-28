@@ -6,6 +6,7 @@ def main():
     while tetris.run:
         tetris.play()
     tetris.quit()
+    quit()
 
 
 if __name__ == '__main__':

@@ -28,21 +28,9 @@ class Tile(object):
             K_RIGHT: self.right,
         }
 
-    def caliberation(self):
-        x_max = np.max(self.pos[:, 0])
-        x_min = np.min(self.pos[:, 0])
-        y_max = np.max(self.pos[:, 1])
-        if x_max > (cols - 1):
-            self.x -= x_max - cols + 1
-        elif x_min < 0:
-            self.x += 0 - x_min
-        if y_max > (rows - 1):
-            self.y -= y_max - rows + 1
-            self.locked = True
-
     @property
-    def pos(self):
-        """Position of grids."""
+    def pos_and_color(self):
+        """Position and color in grids."""
         structure = self.data.get("structure")
         structure = structure[self.rotate_order % len(structure)]
         return np.array(
@@ -118,7 +106,7 @@ class Tile(object):
     def L(self):
         return {
             "structure": np.array(
-                [[0, 4, 8, 9], [4, 5, 6, 8], [0, 1, 5, 9], [2, 4, 5, 6]]
+                [[1, 5, 9, 10], [4, 5, 6, 8], [0, 1, 5, 9], [2, 4, 5, 6]]
             ),
             "color": np.array([151, 165, 198]),
         }
