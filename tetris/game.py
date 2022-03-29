@@ -23,13 +23,12 @@ class Tetris(object):
 
     def __init__(self, *args, **kwargs) -> None:
         pygame.init()
+        pygame.key.set_repeat(95, 95)
         self.window = pygame.display.set_mode((window_width, window_height))
         self.window.fill((0, 0, 0))
         self.playground = pygame.Surface((play_width, play_height))
         self.tile = Tile()
-        self.lock_tiles = np.array([[]])
-        # NOTE: Remember to remove L
-        self.tile.data = self.tile.L
+        self.lock_tiles_list = np.array([[]])
         self.clock = pygame.time.Clock()
         self.time = 0
         self.control_tick = 0
@@ -37,8 +36,8 @@ class Tetris(object):
         self.pause = False
 
     def play(self):
-        pressed_key = self.control()
-        self.caliberation(pressed_key)
+        self.control()
+        self.clear()
         self.display()
 
     def control(self):
@@ -47,20 +46,19 @@ class Tetris(object):
         arrow keys -> control
         space -> lock to bottom
         """
-        # TODO: feasible tile region
         self.tile_fall(fall_speed)
-        self.single_key_down_detection()
-        pressed_key = self.repeat_keys_detection()
-        return pressed_key
+        self.caliberation(self.key_down_detection())
 
-    def tile_lock(self):
-        self.tile.locked = True
-        self.lock_tiles = (
-            self.tile.pos_and_color
-            if self.lock_tiles.size == 0
-            else np.append(self.lock_tiles, self.tile.pos_and_color, axis=0)
-        )
-        self.get_new_tile()
+    def clear(self):
+        clear_list = []
+        if self.lock_tiles_list.size:
+            for row in range(rows - 1, -1, -1):
+                mask = (self.lock_tiles_list[:, 1] == row)
+                if len(self.lock_tiles_list[mask, :]) == 15:
+                    clear_list.append(row)
+
+        for row in clear_list:
+            ...
 
     def caliberation(self, pressed_key):
         """Correct tile position and check locking."""
@@ -70,7 +68,7 @@ class Tetris(object):
 
         encounter_lock_pos = False
         for x, y in self.tile.pos_and_color[:,:2]:
-            encounter_lock_pos |= [x,y] in self.lock_tiles[:,:2].tolist()
+            encounter_lock_pos |= [x,y] in self.lock_tiles_list[:,:2].tolist()
 
         if pressed_key:
             if (x_max > (cols - 1)):
@@ -88,10 +86,24 @@ class Tetris(object):
                     self.tile_lock()
                 elif pressed_key == K_UP:
                     self.tile.rotate_order -= 1
+                    self.tile.y -= 1
+            else:
+                if y_max > (rows - 1):
+                    self.tile.y -= 1
+                    self.tile_lock()
+        else:
+            if y_max > (rows - 1) or encounter_lock_pos:
+                self.tile.y -= 1
+                self.tile_lock()
 
-        if y_max > (rows - 1) or encounter_lock_pos and not pressed_key:
-            self.tile.y -= 1
-            self.tile_lock()
+    def tile_lock(self):
+        self.tile.locked = True
+        self.lock_tiles_list = (
+            self.tile.pos_and_color
+            if self.lock_tiles_list.size == 0
+            else np.append(self.lock_tiles_list, self.tile.pos_and_color, axis=0)
+        )
+        self.get_new_tile()
 
     def display(self):
         """Display the game window."""
@@ -108,17 +120,19 @@ class Tetris(object):
         self.time += self.clock.get_rawtime()
         if self.time > fall_speed:
             self.time = 0
-            # self.tile.y += 1
+            self.tile.y += 1
 
     def render_grids_and_tiles(self):
-        if self.lock_tiles.size:
-            for col, row, color in self.lock_tiles:
+        # render locked tiles
+        if self.lock_tiles_list.size:
+            for col, row, color in self.lock_tiles_list:
                 pygame.draw.rect(
                     self.playground,
                     color,
                     (col * tile_size, row * tile_size, tile_size, tile_size),
                     0,
                 )
+        # render current tile
         for col, row, color in self.tile.pos_and_color:
             pygame.draw.rect(
                 self.playground,
@@ -126,6 +140,8 @@ class Tetris(object):
                 (col * tile_size, row * tile_size, tile_size, tile_size),
                 0,
             )
+
+        # render grid lines
         for row in range(1, rows):
             y = tile_size * row
             pygame.draw.line(
@@ -168,7 +184,7 @@ class Tetris(object):
             self.control_tick = 0
             func()
 
-    def single_key_down_detection(self):
+    def key_down_detection(self):
         """Detect single key press"""
         if pygame.event.get(QUIT):
             self.run = False
@@ -185,13 +201,4 @@ class Tetris(object):
                 self.control_tick = 0
                 func = self.tile.event_control_map[event.key]
                 func()
-
-    def repeat_keys_detection(self):
-        """Detect repeat key press"""
-        keys = pygame.key.get_pressed()
-        for event in self.tile.event_control_map:
-            if keys[event]:
-                self.trigger_movement(self.tile.event_control_map[event])
-                return event
-                # the following break make sure trigger only one repeat key press
-                break
+                return event.key
