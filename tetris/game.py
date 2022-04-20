@@ -2,7 +2,19 @@ import pygame
 import sys
 import numpy as np
 from tetris.tile import Tile
-from pygame import QUIT, KEYDOWN, K_ESCAPE, K_q, K_p, K_n, K_UP, K_DOWN, K_RIGHT, K_LEFT
+from pygame import (
+    QUIT,
+    KEYDOWN,
+    K_ESCAPE,
+    K_q,
+    K_p,
+    K_n,
+    K_r,
+    K_UP,
+    K_DOWN,
+    K_RIGHT,
+    K_LEFT,
+)
 from tetris.constants import (
     tile_size,
     window_width,
@@ -14,7 +26,6 @@ from tetris.constants import (
     tl_x,
     tl_y,
     fall_speed,
-    control_threshold,
 )
 
 
@@ -28,16 +39,15 @@ class Tetris(object):
         self.window.fill((0, 0, 0))
         self.playground = pygame.Surface((play_width, play_height))
         self.tile = Tile()
-        self.lock_tiles_list = np.array([[]])
+        self.tiles_grid = [[(0, 0, 0) for _ in range(cols)] for _ in range(rows)]
         self.clock = pygame.time.Clock()
         self.time = 0
-        self.control_tick = 0
         self.run = True
         self.pause = False
 
     def play(self):
         self.control()
-        self.clear()
+        self.clear_and_move_down()
         self.display()
 
     def control(self):
@@ -47,73 +57,19 @@ class Tetris(object):
         space -> lock to bottom
         """
         self.tile_fall(fall_speed)
-        self.caliberation(self.key_down_detection())
+        self.key_down_detection()
 
-    def clear(self):
-        clear_list = []
-        if self.lock_tiles_list.size:
-            for row in range(rows - 1, -1, -1):
-                mask = (self.lock_tiles_list[:, 1] == row)
-                if len(self.lock_tiles_list[mask, :]) == 15:
-                    clear_list.append(row)
-
-        for row in clear_list:
-            ...
-
-    def caliberation(self, pressed_key):
-        """Correct tile position and check locking."""
-        x_max = np.max(self.tile.pos_and_color[:, 0])
-        x_min = np.min(self.tile.pos_and_color[:, 0])
-        y_max = np.max(self.tile.pos_and_color[:, 1])
-
-        encounter_lock_pos = False
-        for x, y in self.tile.pos_and_color[:,:2]:
-            encounter_lock_pos |= [x,y] in self.lock_tiles_list[:,:2].tolist()
-
-        if pressed_key:
-            if (x_max > (cols - 1)):
-                self.tile.x -= x_max - cols + 1
-            elif (x_min < 0):
-                self.tile.x += 0 - x_min
-
-            if encounter_lock_pos:
-                if pressed_key == K_RIGHT:
-                    self.tile.x -= 1
-                elif pressed_key == K_LEFT:
-                    self.tile.x += 1
-                elif pressed_key == K_DOWN:
-                    self.tile.y -= 1
-                    self.tile_lock()
-                elif pressed_key == K_UP:
-                    self.tile.rotate_order -= 1
-                    self.tile.y -= 1
-            else:
-                if y_max > (rows - 1):
-                    self.tile.y -= 1
-                    self.tile_lock()
-        else:
-            if y_max > (rows - 1) or encounter_lock_pos:
-                self.tile.y -= 1
-                self.tile_lock()
+    def clear_and_move_down(self):
+        for row in range(rows - 1, -1, -1):
+            if (0, 0, 0) not in self.tiles_grid[row]:
+                self.tiles_grid.pop(row)
+                self.tiles_grid.insert(0, [(0, 0, 0) for _ in range(cols)])
 
     def tile_lock(self):
         self.tile.locked = True
-        self.lock_tiles_list = (
-            self.tile.pos_and_color
-            if self.lock_tiles_list.size == 0
-            else np.append(self.lock_tiles_list, self.tile.pos_and_color, axis=0)
-        )
+        for x, y, color in self.tile.pos_and_color:
+            self.tiles_grid[y][x] = color
         self.get_new_tile()
-
-    def display(self):
-        """Display the game window."""
-        self.playground.fill((0, 0, 0))
-        self.render_grids_and_tiles()
-        self.window.blit(self.playground, (tl_x, tl_y))
-        pygame.display.update()
-
-    def get_new_tile(self):
-        self.tile = Tile()
 
     def tile_fall(self, fall_speed):
         self.clock.tick()
@@ -121,11 +77,70 @@ class Tetris(object):
         if self.time > fall_speed:
             self.time = 0
             self.tile.y += 1
+            if not self.feasible:
+                self.tile.y -= 1
+                self.tile_lock()
+
+    @property
+    def feasible(self) -> bool:
+        """The feasible property."""
+        empty = [
+            (col, row)
+            for col in range(cols)
+            for row in range(rows)
+            if self.tiles_grid[row][col] == (0, 0, 0)
+        ]
+        for x, y, _ in self.tile.pos_and_color:
+            if (x, y) not in empty:
+                return False
+        return True
+
+    def key_down_detection(self):
+        """Detect single key press"""
+        if pygame.event.get(QUIT):
+            self.run = False
+
+        # for single key down press
+        events = pygame.event.get(KEYDOWN)
+        for event in events:
+            key = event.key
+            if key == K_ESCAPE or key == K_q:
+                self.run = False
+            if key == K_p:
+                self.pause_game()
+            if key == K_n:
+                self.get_new_tile()
+            if key == K_r:
+                self.tiles_grid = [
+                    [(0, 0, 0) for _ in range(cols)] for _ in range(rows)
+                ]
+
+            if key == K_DOWN:
+                self.tile.y += 1
+                if not self.feasible:
+                    self.tile.y -= 1
+                    self.tile_lock()
+
+            elif key == K_UP:
+                self.tile.rotate_order += 1
+                self.tile.rotate_order %= len(self.tile.data.get("structure"))
+                if not self.feasible:
+                    self.tile.rotate_order -= 1
+
+            elif key == K_RIGHT:
+                self.tile.x += 1
+                if not self.feasible:
+                    self.tile.x -= 1
+            elif key == K_LEFT:
+                self.tile.x -= 1
+                if not self.feasible:
+                    self.tile.x += 1
 
     def render_grids_and_tiles(self):
+        """Draw static tiles -> draw current tile -> draw grid lines"""
         # render locked tiles
-        if self.lock_tiles_list.size:
-            for col, row, color in self.lock_tiles_list:
+        for row, row_array in enumerate(self.tiles_grid):
+            for col, color in enumerate(row_array):
                 pygame.draw.rect(
                     self.playground,
                     color,
@@ -159,6 +174,15 @@ class Tetris(object):
                 end_pos=(x, play_height),
             )
 
+    def get_new_tile(self):
+        self.tile = Tile()
+
+    def display(self):
+        """Display the game window."""
+        self.playground.fill((0, 0, 0))
+        self.render_grids_and_tiles()
+        self.window.blit(self.playground, (tl_x, tl_y))
+        pygame.display.update()
 
     def pause_game(self):
         self.pause = True
@@ -170,6 +194,12 @@ class Tetris(object):
                     key = event.key
                     if key == K_p:
                         self.pause = False
+                    if key == K_r:
+                        self.tiles_grid = [
+                            [(0, 0, 0) for _ in range(cols)] for _ in range(rows)
+                        ]
+                    if key == K_n:
+                        self.get_new_tile()
                     if key == K_ESCAPE or key == K_q:
                         self.run = False
                         self.pause = False
@@ -177,28 +207,3 @@ class Tetris(object):
     def quit(self):
         pygame.quit()
         sys.exit()
-
-    def trigger_movement(self, func):
-        self.control_tick += 1
-        if self.control_tick > control_threshold:
-            self.control_tick = 0
-            func()
-
-    def key_down_detection(self):
-        """Detect single key press"""
-        if pygame.event.get(QUIT):
-            self.run = False
-        # for single key down press
-        events = pygame.event.get(KEYDOWN)
-        for event in events:
-            if event.key == K_ESCAPE or event.key == K_q:
-                self.run = False
-            if event.key == K_p:
-                self.pause_game()
-            if event.key == K_n:
-                self.get_new_tile()
-            if event.key in self.tile.event_control_map:
-                self.control_tick = 0
-                func = self.tile.event_control_map[event.key]
-                func()
-                return event.key

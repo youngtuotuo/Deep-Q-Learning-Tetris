@@ -8,7 +8,6 @@ play_width = tile_size * cols
 play_height = tile_size * rows
 
 fall_speed = 220
-control_threshold = 5
 
 tl_x = (window_width - play_width) // 2
 tl_y = (window_height - play_height) // 2

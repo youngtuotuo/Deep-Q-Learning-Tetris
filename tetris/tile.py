@@ -1,4 +1,3 @@
-from pygame import K_DOWN, K_UP, K_RIGHT, K_LEFT
 import random
 from tetris.constants import rows, cols
 import numpy as np
@@ -21,12 +20,6 @@ class Tile(object):
         self.data = getattr(self, self.name)
         self.rotate_order = 0
         self.locked = False
-        self.event_control_map = {
-            K_UP: self.rotate,
-            K_DOWN: self.down,
-            K_LEFT: self.left,
-            K_RIGHT: self.right,
-        }
 
     @property
     def pos_and_color(self):
@@ -40,48 +33,32 @@ class Tile(object):
             ], dtype=object
         )
 
-    def rotate(self):
-        self.rotate_order += 1
-        self.rotate_order %= len(self.data.get("structure"))
-
-    def down(self):
-        if self.y < rows:
-            self.y += 1
-
-    def right(self):
-        if self.x < cols:
-            self.x += 1
-
-    def left(self):
-        if self.x >= 0:
-            self.x -= 1
-
     @property
     def I(self):
         return {
             "structure": np.array([[0, 1, 2, 3], [1, 5, 9, 13]]),
-            "color": np.array([34, 56, 68]),
+            "color": (34, 56, 68),
         }
 
     @property
     def S(self):
         return {
             "structure": np.array([[1, 5, 6, 10], [1, 2, 4, 5]]),
-            "color": np.array([96, 110, 118]),
+            "color": (96, 110, 118),
         }
 
     @property
     def Z(self):
         return {
             "structure": np.array([[2, 5, 6, 9], [0, 1, 5, 6]]),
-            "color": np.array([130, 156, 129]),
+            "color": (130, 156, 129),
         }
 
     @property
     def O(self):
         return {
             "structure": np.array([[0, 1, 4, 5]]),
-            "color": np.array([169, 161, 151]),
+            "color": (169, 161, 151),
         }
 
     @property
@@ -90,7 +67,7 @@ class Tile(object):
             "structure": np.array(
                 [[1, 4, 5, 6], [1, 5, 6, 9], [4, 5, 6, 9], [1, 4, 5, 9]]
             ),
-            "color": np.array([200, 162, 166]),
+            "color": (200, 162, 166),
         }
 
     @property
@@ -99,7 +76,7 @@ class Tile(object):
             "structure": np.array(
                 [[1, 5, 8, 9], [0, 4, 5, 6], [1, 2, 5, 9], [4, 5, 6, 10]]
             ),
-            "color": np.array([152, 147, 176]),
+            "color": (152, 147, 176),
         }
 
     @property
@@ -108,5 +85,5 @@ class Tile(object):
             "structure": np.array(
                 [[1, 5, 9, 10], [4, 5, 6, 8], [0, 1, 5, 9], [2, 4, 5, 6]]
             ),
-            "color": np.array([151, 165, 198]),
+            "color": (151, 165, 198),
         }
