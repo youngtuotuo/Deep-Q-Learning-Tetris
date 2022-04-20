@@ -3,3 +3,8 @@
     $ python -m main
 ```
 
+<p align="center">
+    <img src="figures/game.gif" />
+</p>
+
+
