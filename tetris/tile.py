@@ -1,5 +1,5 @@
 import random
-from tetris.constants import rows, cols
+from tetris.constants import cols
 import numpy as np
 
 

@@ -1,6 +1,5 @@
 import pygame
 import sys
-import numpy as np
 from tetris.tile import Tile
 from pygame import (
     QUIT,
