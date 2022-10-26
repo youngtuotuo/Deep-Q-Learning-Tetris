@@ -1,6 +1,7 @@
 import pygame
 import sys
 from tetris.tile import Tile
+import numpy as np
 from pygame import (
     QUIT,
     KEYDOWN,
@@ -43,6 +44,11 @@ class Tetris(object):
         self.time = 0
         self.run = True
         self.pause = False
+        self.font = pygame.font.Font(
+            "/home/tuo/.local/share/fonts/Hack Regular Nerd Font Complete.ttf", 25
+        )
+
+        self.cleared_rows = 0
 
     def play(self):
         self.control()
@@ -51,6 +57,7 @@ class Tetris(object):
 
     def control(self):
         """Main keyboard listen method.
+
         q, esc -> quit
         arrow keys -> control
         space -> lock to bottom
@@ -59,10 +66,61 @@ class Tetris(object):
         self.key_down_detection()
 
     def clear_and_move_down(self):
+        """Clear complete row and move the whole board down"""
         for row in range(rows - 1, -1, -1):
             if (0, 0, 0) not in self.tiles_grid[row]:
+                self.cleared_rows += 1
                 self.tiles_grid.pop(row)
                 self.tiles_grid.insert(0, [(0, 0, 0) for _ in range(cols)])
+
+    def reset(self):
+        self.tiles_grid = [[(0, 0, 0) for _ in range(cols)] for _ in range(rows)]
+        self.cleared_rows = 0
+
+    def step(self):
+        ...
+
+    @property
+    def n_actions(self):
+        return 4
+
+    @property
+    def window_array(self):
+        return pygame.surfarray.array2d(self.window)
+
+    @property
+    def states(self):
+        """The model input. Represent current board's condition."""
+        entropy, heights = self.entropy_and_heights
+        return self.cleared_rows, self.holes, entropy, heights
+
+    @property
+    def entropy_and_heights(self):
+        """
+        Entropy means how upside down the board is.
+        Heights means the total tile height of each column.
+        """
+        mask = np.array(
+            [[cell != (0, 0, 0) for cell in row] for row in self.tiles_grid]
+        )
+        invert_heights = np.where(mask.any(axis=0), np.argmax(mask, axis=0), rows)
+        heights = rows - invert_heights
+        total_height = np.sum(heights)
+        currs = heights[:-1]
+        nexts = heights[1:]
+        diffs = np.abs(currs - nexts)
+        entropy = np.sum(diffs)
+        return entropy, total_height
+
+    @property
+    def holes(self):
+        holes = 0
+        for col in zip(*self.tiles_grid):
+            row = 0
+            while row < rows and col[row] == (0, 0, 0):
+                row += 1
+            holes += len([x for x in col[row + 1 :] if x == (0, 0, 0)])
+        return holes
 
     def tile_lock(self):
         self.tile.locked = True
@@ -76,13 +134,13 @@ class Tetris(object):
         if self.time > fall_speed:
             self.time = 0
             self.tile.y += 1
-            if not self.feasible:
+            if not self.collision:
                 self.tile.y -= 1
                 self.tile_lock()
 
     @property
-    def feasible(self) -> bool:
-        """The feasible property."""
+    def collision(self) -> bool:
+        """The collision property."""
         empty = [
             (col, row)
             for col in range(cols)
@@ -105,10 +163,13 @@ class Tetris(object):
             key = event.key
             if key == K_ESCAPE or key == K_q:
                 self.run = False
+
             if key == K_p:
                 self.pause_game()
+
             if key == K_n:
                 self.get_new_tile()
+
             if key == K_r:
                 self.tiles_grid = [
                     [(0, 0, 0) for _ in range(cols)] for _ in range(rows)
@@ -116,23 +177,24 @@ class Tetris(object):
 
             if key == K_DOWN:
                 self.tile.y += 1
-                if not self.feasible:
+                if not self.collision:
                     self.tile.y -= 1
                     self.tile_lock()
 
             elif key == K_UP:
                 self.tile.rotate_order += 1
                 self.tile.rotate_order %= len(self.tile.data.get("structure"))
-                if not self.feasible:
+                if not self.collision:
                     self.tile.rotate_order -= 1
 
             elif key == K_RIGHT:
                 self.tile.x += 1
-                if not self.feasible:
+                if not self.collision:
                     self.tile.x -= 1
+
             elif key == K_LEFT:
                 self.tile.x -= 1
-                if not self.feasible:
+                if not self.collision:
                     self.tile.x += 1
 
     def render_grids_and_tiles(self):
@@ -178,9 +240,16 @@ class Tetris(object):
 
     def display(self):
         """Display the game window."""
-        self.playground.fill((0, 0, 0))
+        self.window.fill((0, 0, 0))
         self.render_grids_and_tiles()
         self.window.blit(self.playground, (tl_x, tl_y))
+        rows, holes, entropy, heights = self.states
+        text = self.font.render(
+            f"rows: {rows}, holes: {holes}, entropy: {entropy}, heights: {heights}",
+            True,
+            (127, 127, 127),
+        )
+        self.window.blit(text, (0, 0))
         pygame.display.update()
 
     def pause_game(self):
@@ -193,12 +262,14 @@ class Tetris(object):
                     key = event.key
                     if key == K_p:
                         self.pause = False
+
                     if key == K_r:
                         self.tiles_grid = [
                             [(0, 0, 0) for _ in range(cols)] for _ in range(rows)
                         ]
                     if key == K_n:
                         self.get_new_tile()
+
                     if key == K_ESCAPE or key == K_q:
                         self.run = False
                         self.pause = False
