@@ -29,7 +29,6 @@ from tetris.constants import (
 )
 
 
-
 class Tetris(object):
     """Main Tetris Game."""
 
@@ -64,8 +63,7 @@ class Tetris(object):
         self.cleared_rows = 0
 
     def step(self, action):
-        """This method is used for model output.
-        """
+        """This method is used for model output."""
         if pygame.event.get(QUIT):
             self.run = False
 
@@ -117,7 +115,7 @@ class Tetris(object):
 
     @property
     def touch_ceiling(self):
-        return (self.tile.locked and self.tile.y < 1)
+        return self.tile.locked and self.tile.y < 1
 
     @property
     def n_actions(self):
@@ -125,7 +123,7 @@ class Tetris(object):
 
     @property
     def reward(self) -> int:
-        return 1 + (self.cleared_rows ** 2) * cols
+        return 1 + (self.cleared_rows**2) * cols
 
     @property
     def window_array(self):
