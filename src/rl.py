@@ -20,35 +20,10 @@ class ReplayMemory(object):
     def __len__(self):
         return len(self.memory)
 
+class DQN(nn.Module):
 
-class DeepQNetwork(nn.Module):
-    def __init__(self, n_actions):
-        super().__init__()
-
-        self.conv = nn.Sequential(
-            nn.Linear(4, 64),
-            nn.ReLU(inplace=True),
-            nn.Linear(64, 64),
-            nn.ReLU(inplace=True),
-            nn.Linear(64, n_actions),
-        )
-
-        self._create_weights()
-
-    def _create_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Linear):
-                # nn.init.xavier_uniform_(m.weight)
-                nn.init.constant_(m.bias, 0)
-
-    def forward(self, x):
-        x = self.conv(x)
-        return x
-
-
-class DeepQNetworkWindow(nn.Module):
     def __init__(self, h, w, outputs):
-        super().__init__()
+        super(DQN, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, kernel_size=5, stride=2)
         self.bn1 = nn.BatchNorm2d(16)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=5, stride=2)
@@ -58,9 +33,8 @@ class DeepQNetworkWindow(nn.Module):
 
         # Number of Linear input connections depends on output of conv2d layers
         # and therefore the input image size, so compute it.
-        def conv2d_size_out(size, kernel_size=5, stride=2):
-            return (size - (kernel_size - 1) - 1) // stride + 1
-
+        def conv2d_size_out(size, kernel_size = 5, stride = 2):
+            return (size - (kernel_size - 1) - 1) // stride  + 1
         convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w)))
         convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(h)))
         linear_input_size = convw * convh * 32
@@ -73,7 +47,3 @@ class DeepQNetworkWindow(nn.Module):
         x = F.relu(self.bn2(self.conv2(x)))
         x = F.relu(self.bn3(self.conv3(x)))
         return self.head(x.view(x.size(0), -1))
-
-
-if __name__ == "__main__":
-    pass
