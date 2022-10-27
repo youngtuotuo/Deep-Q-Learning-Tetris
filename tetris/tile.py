@@ -14,7 +14,7 @@ class Tile(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self.x = cols // 2  # TODO: use random to start x position
+        self.x = cols // 2
         self.y = 0
         self.name = random.choice(["I", "S", "Z", "O", "T", "J", "L"])
         self.data = getattr(self, self.name)

@@ -1,4 +1,5 @@
 from tetris.game import Tetris
+from tetris.constants import fall_speed
 import pygame
 import numpy as np
 
@@ -6,10 +7,10 @@ import numpy as np
 def main():
     tetris = Tetris()
     while tetris.run:
-        tetris.play()
-        # Convert the window in black color(2D) into a matrix
-        window_pixel_matrix = np.array(pygame.surfarray.array3d(tetris.window))
-        print(window_pixel_matrix.shape)
+        tetris.tile_fall()
+        tetris.key_down_detection()
+        tetris.clear_and_move_down()
+        tetris.display()
     tetris.quit()
 
 

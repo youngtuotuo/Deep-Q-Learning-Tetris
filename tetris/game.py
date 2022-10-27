@@ -29,6 +29,7 @@ from tetris.constants import (
 )
 
 
+
 class Tetris(object):
     """Main Tetris Game."""
 
@@ -50,21 +51,6 @@ class Tetris(object):
 
         self.cleared_rows = 0
 
-    def play(self):
-        self.control()
-        self.clear_and_move_down()
-        self.display()
-
-    def control(self):
-        """Main keyboard listen method.
-
-        q, esc -> quit
-        arrow keys -> control
-        space -> lock to bottom
-        """
-        self.tile_fall(fall_speed)
-        self.key_down_detection()
-
     def clear_and_move_down(self):
         """Clear complete row and move the whole board down"""
         for row in range(rows - 1, -1, -1):
@@ -77,12 +63,69 @@ class Tetris(object):
         self.tiles_grid = [[(0, 0, 0) for _ in range(cols)] for _ in range(rows)]
         self.cleared_rows = 0
 
-    def step(self):
-        ...
+    def step(self, action):
+        """This method is used for model output.
+        """
+        if pygame.event.get(QUIT):
+            self.run = False
+
+        # for single key down press
+        events = pygame.event.get(KEYDOWN)
+        for event in events:
+            key = event.key
+            if key == K_ESCAPE or key == K_q:
+                self.run = False
+
+            if key == K_p:
+                self.pause_game()
+
+            if key == K_r:
+                self.tiles_grid = [
+                    [(0, 0, 0) for _ in range(cols)] for _ in range(rows)
+                ]
+
+        # Down
+        if action == 0:
+            self.tile.y += 1
+            if not self.collision:
+                self.tile.y -= 1
+                self.tile.locked = True
+                for x, y, color in self.tile.pos_and_color:
+                    self.tiles_grid[y][x] = color
+                self.check_game_over()
+        # Up
+        elif action == 1:
+            self.tile.rotate_order += 1
+            self.tile.rotate_order %= len(self.tile.data.get("structure"))
+            if not self.collision:
+                self.tile.rotate_order -= 1
+        # Right
+        elif action == 2:
+            self.tile.x += 1
+            if not self.collision:
+                self.tile.x -= 1
+        # Left
+        elif action == 3:
+            self.tile.x -= 1
+            if not self.collision:
+                self.tile.x += 1
+
+        self.clear_and_move_down()
+        done = self.tile.locked and self.tile.y < 1
+
+        return self.reward, done
+
+    @property
+    def touch_ceiling(self):
+        return (self.tile.locked and self.tile.y < 1)
 
     @property
     def n_actions(self):
         return 4
+
+    @property
+    def reward(self) -> int:
+        return 1 + (self.cleared_rows ** 2) * cols
 
     @property
     def window_array(self):
@@ -122,13 +165,7 @@ class Tetris(object):
             holes += len([x for x in col[row + 1 :] if x == (0, 0, 0)])
         return holes
 
-    def tile_lock(self):
-        self.tile.locked = True
-        for x, y, color in self.tile.pos_and_color:
-            self.tiles_grid[y][x] = color
-        self.get_new_tile()
-
-    def tile_fall(self, fall_speed):
+    def tile_fall(self, fall_speed=fall_speed):
         self.clock.tick()
         self.time += self.clock.get_rawtime()
         if self.time > fall_speed:
@@ -136,7 +173,10 @@ class Tetris(object):
             self.tile.y += 1
             if not self.collision:
                 self.tile.y -= 1
-                self.tile_lock()
+                self.tile.locked = True
+                for x, y, color in self.tile.pos_and_color:
+                    self.tiles_grid[y][x] = color
+                self.check_game_over()
 
     @property
     def collision(self) -> bool:
@@ -179,7 +219,10 @@ class Tetris(object):
                 self.tile.y += 1
                 if not self.collision:
                     self.tile.y -= 1
-                    self.tile_lock()
+                    self.tile.locked = True
+                    for x, y, color in self.tile.pos_and_color:
+                        self.tiles_grid[y][x] = color
+                    self.check_game_over()
 
             elif key == K_UP:
                 self.tile.rotate_order += 1
@@ -196,6 +239,12 @@ class Tetris(object):
                 self.tile.x -= 1
                 if not self.collision:
                     self.tile.x += 1
+
+    def check_game_over(self):
+        if self.tile.locked and self.tile.y < 1:
+            self.reset()
+        else:
+            self.get_new_tile()
 
     def render_grids_and_tiles(self):
         """Draw static tiles -> draw current tile -> draw grid lines"""
