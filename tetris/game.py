@@ -293,12 +293,18 @@ class Tetris(object):
         self.render_grids_and_tiles()
         self.window.blit(self.playground, (tl_x, tl_y))
         rows, holes, entropy, heights = self.states
-        text = self.font.render(
+        states = self.font.render(
             f"rows: {rows}, holes: {holes}, entropy: {entropy}, heights: {heights}",
             True,
             (127, 127, 127),
         )
-        self.window.blit(text, (0, 0))
+        reward =self.font.render(
+            f"reward: {self.reward}",
+            True,
+            (127, 127, 127),
+        ) 
+        self.window.blit(states, (0, 0))
+        self.window.blit(reward, (0, 30))
         pygame.display.update()
 
     def pause_game(self):
