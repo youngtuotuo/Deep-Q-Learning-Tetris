@@ -111,9 +111,8 @@ class Tetris(object):
                 self.tile.x += 1
 
         self.clear_and_move_down()
-        done = self.tile.locked and self.tile.y < 1
 
-        return self.reward, done
+        return self.reward, self.touch_ceiling
 
     @property
     def touch_ceiling(self):
@@ -125,14 +124,19 @@ class Tetris(object):
 
     @property
     def reward(self) -> int:
-        return 1 + (self.cleared_rows ** 2) * cols
+        rows, holes, entropy, heights = self.info
+        return -0.51 * heights + 0.76 * rows - 0.36 * holes - 0.18 * entropy
+
+    @property
+    def binary(self):
+        return [[cell == (1,1,1) for cell in row] for row in self.tiles_grid]
 
     @property
     def window_array(self):
-        return pygame.surfarray.array2d(self.window)
+        return pygame.surfarray.array3d(self.playground)
 
     @property
-    def states(self):
+    def info(self):
         """The model input. Represent current board's condition."""
         entropy, heights = self.entropy_and_heights
         return self.cleared_rows, self.holes, entropy, heights
@@ -292,7 +296,7 @@ class Tetris(object):
         self.window.fill((0, 0, 0))
         self.render_grids_and_tiles()
         self.window.blit(self.playground, (tl_x, tl_y))
-        rows, holes, entropy, heights = self.states
+        rows, holes, entropy, heights = self.info
         states = self.font.render(
             f"rows: {rows}, holes: {holes}, entropy: {entropy}, heights: {heights}",
             True,

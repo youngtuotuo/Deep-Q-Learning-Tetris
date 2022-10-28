@@ -1,4 +1,4 @@
-# Deep Q learning play Tetris with interactive plots
+# Deep Q learning play Tetris with interactive plots (WIP)
 Train
 ```bash
     $ python main.py

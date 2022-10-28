@@ -34,9 +34,9 @@ def main(opt):
     env = Tetris()
     env.reset()
 
-    states = torch.tensor(env.info, dtype=torch.float, device=device)
-    policy_net = DeepQNetwork(env.n_actions).to(device)
-    target_net = DeepQNetwork(env.n_actions).to(device)
+    states = torch.tensor(env.window_array, dtype=torch.float, device=device).transpose(0, 2)[None, :] / 255.0
+    policy_net = DQN2D(play_height, play_width, env.n_actions).to(device)
+    target_net = DQN2D(play_height, play_width, env.n_actions).to(device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -64,7 +64,7 @@ def main(opt):
             if sample > eps_threshold:
                 with torch.no_grad():
                     predictions = policy_net(states)
-                    action = predictions.max().view(1, 1)
+                    action = predictions.max(1)[1].view(1, 1)
             else:
                 action = torch.tensor(
                     [[randrange(env.n_actions)]], device=device, dtype=torch.int64
@@ -78,10 +78,10 @@ def main(opt):
             env.display()
 
             if not done:
-                next_states = torch.tensor(env.info, dtype=torch.float, device=device)
+                next_states = torch.tensor(env.window_array, dtype=torch.float, device=device).transpose(0, 2)[None, :] / 255.0
             else:
                 env.reset()
-                next_states = torch.tensor(env.info, dtype=torch.float, device=device)
+                next_states = torch.tensor(env.window_array, dtype=torch.float, device=device).transpose(0, 2)[None, :] / 255.0
 
             # Store the transition in memory
             memory.push(states, action, next_states, reward)
@@ -95,9 +95,8 @@ def main(opt):
                 # to Transition of batch-arrays.
                 batch = Transition(*zip(*transitions))
 
-                states_batch = torch.cat(batch.states).view(opt.batch_size, 4)
-                # states_batch = torch.cat(batch.states)
-                action_batch = torch.round(torch.cat(batch.action)).to(torch.int64)
+                states_batch = torch.cat(batch.states)
+                action_batch = torch.cat(batch.action)
                 reward_batch = torch.cat(batch.reward)
 
                 with amp.autocast():
@@ -113,10 +112,8 @@ def main(opt):
                     # on the "older" target_net; selecting their best reward with max(1)[0].
                     # This is merged based on the mask, such that we'll have either the expected
                     # state value or 0 in case the state was final.
-                    next_states_batch = torch.cat(batch.next_states).view(
-                        opt.batch_size, 4
-                    )
-                    next_state_values = target_net(next_states_batch).max()
+                    next_states_batch = torch.cat(batch.next_states)
+                    next_state_values = target_net(next_states_batch).max(1)[0].detach()
                     # Compute the expected Q values
                     expected_state_action_values = (
                         next_state_values * opt.gamma
@@ -135,23 +132,23 @@ def main(opt):
                 scaler.update()
                 optimizer.zero_grad()
 
-            if done:
-                epochs_durations.append(step + 1)
-                losses.append(loss.item())
-                rewards.append(reward.item())
-                ax1.clear()
-                ax2.clear()
-                ax3.clear()
-                ax1.set_ylabel("Steps")
-                ax2.set_ylabel("Loss")
-                ax3.set_ylabel("Reward")
-                ax1.plot(np.array(epochs_durations))
-                ax2.plot(np.array(losses))
-                ax3.plot(np.array(rewards))
+                if done:
+                    epochs_durations.append(step + 1)
+                    losses.append(loss.item())
+                    rewards.append(reward.item())
+                    ax1.clear()
+                    ax2.clear()
+                    ax3.clear()
+                    ax1.set_ylabel("Steps")
+                    ax2.set_ylabel("Loss")
+                    ax3.set_ylabel("Reward")
+                    ax1.plot(np.array(epochs_durations))
+                    ax2.plot(np.array(losses))
+                    ax3.plot(np.array(rewards))
 
-                plt.pause(0.001)  # pause a bit so that plots are updated
-                fig.savefig(os.path.join(exp_folder, "statistics.png"))
-                break
+                    plt.pause(0.001)  # pause a bit so that plots are updated
+                    fig.savefig(os.path.join(exp_folder, "statistics.png"))
+                    break
         # Update the target network, copying all weights and biases in DQN
         if epoch % opt.target_update == 0:
             target_net.load_state_dict(policy_net.state_dict())
@@ -171,13 +168,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="DeepQ with Tetris\n\n")
 
     parser.add_argument("--epochs", type=int, default=3000)
-    parser.add_argument("--replay_memory_size", type=int, default=10000)
-    parser.add_argument("--epsilon_start", type=float, default=0.9)
+    parser.add_argument("--replay_memory_size", type=int, default=1000)
+    parser.add_argument("--epsilon_start", type=float, default=1)
     parser.add_argument("--epsilon_decay", type=float, default=200)
-    parser.add_argument("--epsilon_end", type=float, default=0.05)
+    parser.add_argument("--epsilon_end", type=float, default=0.1)
     parser.add_argument("--target_update", type=float, default=10)
     parser.add_argument(
-        "--batch_size", type=int, default=256, help="The number of images per batch"
+        "--batch_size", type=int, default=128, help="The number of images per batch"
     )
     parser.add_argument("--gamma", type=float, default=0.999)
 
