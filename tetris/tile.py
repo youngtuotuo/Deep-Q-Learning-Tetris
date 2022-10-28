@@ -30,8 +30,7 @@ class Tile(object):
             [
                 [self.x + (num % 4), self.y + (num // 4), self.data.get("color")]
                 for num in structure
-            ],
-            dtype=object,
+            ], dtype=object
         )
 
     @property
