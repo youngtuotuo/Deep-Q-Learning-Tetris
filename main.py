@@ -51,9 +51,9 @@ def main(opt):
     losses = []
     rewards = []
 
-    fig, (ax1, ax2, ax3) = plt.subplots(3)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
     for epoch in range(opt.epochs):
-        for t in count():
+        for step in count():
             env.tile_fall()
             sample = random()
             eps_threshold = opt.epsilon_end + (
@@ -132,13 +132,13 @@ def main(opt):
                 optimizer.zero_grad()
 
             if done:
-                epochs_durations.append(t + 1)
+                epochs_durations.append(step + 1)
                 losses.append(loss.item())
                 rewards.append(reward.item())
                 ax1.clear()
                 ax2.clear()
                 ax3.clear()
-                ax1.set_ylabel("Epochs")
+                ax1.set_ylabel("Steps")
                 ax2.set_ylabel("Loss")
                 ax3.set_ylabel("Reward")
                 ax1.plot(np.array(epochs_durations))
@@ -146,14 +146,14 @@ def main(opt):
                 ax3.plot(np.array(rewards))
 
                 plt.pause(0.001)  # pause a bit so that plots are updated
+                fig.savefig(os.path.join(exp_folder, "statistics.png"))
                 break
         # Update the target network, copying all weights and biases in DQN
         if epoch % opt.target_update == 0:
             target_net.load_state_dict(policy_net.state_dict())
             torch.save(
-                policy_net.state_dict(), os.path.join(exp_folder, f"epoch-{epoch}.pt")
+                policy_net.state_dict(), os.path.join(exp_folder, f"epoch-{epoch}-step-{step}.pt")
             )
-            fig.savefig(os.path.join(exp_folder, "statistics.png"))
 
     print("Complete")
     env.quit()

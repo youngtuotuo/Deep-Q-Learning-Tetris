@@ -1,10 +1,17 @@
-# RL on own develop Tetris in PyGame
+# Deep Q learning play Tetris with interactive plots
+Train
 ```bash
-    $ python -m main
+    $ python main.py
 ```
 
+Just play
+```bash
+    $ python play.py
+```
+Remember to change `fall_speed` in `tetris/constants.py` to higher number.
+
 <p align="center">
-    <img src="figures/game.gif" />
+    <img src="figures/record.gif" />
 </p>
 
 
@@ -12,12 +19,3 @@
 `n` get new tile<br>
 `r` reset whole game<br>
 `q`/`esc` quit game
-
-# TODO
-- [ ] Learn RL(Only understand 10%)
-- [ ] Implement at least one RL strategy
-- [ ] support multiple RL strategies
-- [ ] Add bar to control speed
-- [ ] Add score
-
-
