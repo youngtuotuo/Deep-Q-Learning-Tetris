@@ -114,10 +114,6 @@ class Tetris(object):
         return self.reward, done
 
     @property
-    def grid(self):
-        return [[cell == (0, 0, 0) for cell in row] for row in self.tiles_grid]
-
-    @property
     def touch_ceiling(self):
         return self.tile.locked and self.tile.y < 1
 

@@ -1,5 +1,5 @@
 from tetris.game import Tetris
-from tetris.constants import rows, cols
+from tetris.constants import play_width, play_height
 import torch
 import torch.nn as nn
 from src.rl import DQN, ReplayMemory, Transition
@@ -22,14 +22,13 @@ def main(opt):
     env = Tetris()
     env.reset()
     states = torch.tensor(
-        env.grid, dtype=torch.float16, device=device
-    )
-    print(states.shape)
+        pygame.surfarray.array3d(env.playground), dtype=torch.float16, device=device
+    ).unsqueeze(0).transpose(1,3) / 255.0
 
-    policy_net = DQN(rows, cols, env.n_actions).to(device)
+    policy_net = DQN(play_height, play_width, env.n_actions).to(device)
     policy_net.half()
 
-    target_net = DQN(rows, cols, env.n_actions).to(device)
+    target_net = DQN(play_height, play_width, env.n_actions).to(device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.half()
     target_net.eval()
@@ -69,10 +68,10 @@ def main(opt):
                 env.reset()
 
             next_states = torch.tensor(
-                env.grid,
+                pygame.surfarray.array3d(env.playground),
                 dtype=torch.float16,
                 device=device,
-            )
+            ).unsqueeze(0).transpose(1,3) / 255.0
 
             # Store the transition in memory
             memory.push(states, action, next_states, reward)
@@ -113,7 +112,7 @@ def main(opt):
                 # Compute Huber loss
                 loss = criterion(
                     state_action_values, expected_state_action_values.unsqueeze(1)
-                ) + 1e-6
+                )
 
                 # Optimize the model
                 optimizer.zero_grad()
@@ -163,7 +162,7 @@ if __name__ == "__main__":
     parser.add_argument("--epsilon_decay", type=float, default=200)
     parser.add_argument("--target_update", type=float, default=10)
     parser.add_argument(
-        "--batch_size", type=int, default=128, help="The number of images per batch"
+        "--batch_size", type=int, default=256, help="The number of images per batch"
     )
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--save_interval", type=int, default=1000)
