@@ -123,13 +123,13 @@ class Tetris(object):
         return 4
 
     @property
-    def reward(self) -> int:
+    def reward(self):
         rows, holes, entropy, heights = self.info
         return -0.51 * heights + 0.76 * rows - 0.36 * holes - 0.18 * entropy
 
     @property
     def binary(self):
-        return [[cell == (1,1,1) for cell in row] for row in self.tiles_grid]
+        return [[[cell == (0,0,0) for cell in row] for row in self.tiles_grid]]
 
     @property
     def window_array(self):
@@ -303,7 +303,7 @@ class Tetris(object):
             (127, 127, 127),
         )
         reward =self.font.render(
-            f"reward: {self.reward}",
+            f"reward: {self.reward:.2f}",
             True,
             (127, 127, 127),
         ) 
