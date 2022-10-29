@@ -54,15 +54,15 @@ class DQN2D(nn.Module):
             nn.Conv2d(16, 32, kernel_size=4),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
-            nn.Conv2d(32, 32, kernel_size=4),
-            nn.BatchNorm2d(32),
+            nn.Conv2d(32, 64, kernel_size=4),
+            nn.BatchNorm2d(64),
             nn.ReLU(inplace=True)
         )
         def conv2d_size_out(size, kernel_size = 4):
             return (size - kernel_size + 1)
         convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(h)))
         convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w)))
-        linear_input_size = convw * convh * 32
+        linear_input_size = convw * convh * 64
 
         self.head = nn.Sequential(
             nn.Linear(linear_input_size, 16),

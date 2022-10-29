@@ -1,6 +1,4 @@
 from tetris.game import Tetris
-from tetris.constants import fall_speed
-import pygame
 import numpy as np
 
 

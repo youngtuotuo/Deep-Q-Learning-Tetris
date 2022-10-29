@@ -67,14 +67,14 @@ class Tetris(object):
         """This method is used for model output.
         """
         if pygame.event.get(QUIT):
-            self.run = False
+            self.quit()
 
         # for single key down press
         events = pygame.event.get(KEYDOWN)
         for event in events:
             key = event.key
             if key == K_ESCAPE or key == K_q:
-                self.run = False
+                self.quit()
 
             if key == K_p:
                 self.pause_game()
@@ -129,7 +129,10 @@ class Tetris(object):
 
     @property
     def binary(self):
-        return [[[cell == (0,0,0) for cell in row] for row in self.tiles_grid]]
+        temp = self.tiles_grid[:]
+        for x, y, color in self.tile.pos_and_color:
+            temp[y][x] = color
+        return [[[cell != (0,0,0) for cell in row] for row in temp]]
 
     @property
     def window_array(self):
