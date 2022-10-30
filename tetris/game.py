@@ -84,31 +84,31 @@ class Tetris(object):
                     [(0, 0, 0) for _ in range(cols)] for _ in range(rows)
                 ]
 
-        # Down
-        if action == 0:
-            self.tile.y += 1
-            if not self.collision:
-                self.tile.y -= 1
-                self.tile.locked = True
-                for x, y, color in self.tile.pos_and_color:
-                    self.tiles_grid[y][x] = color
-                self.check_game_over()
         # Up
-        elif action == 1:
+        if action == 0:
             self.tile.rotate_order += 1
             self.tile.rotate_order %= len(self.tile.data.get("structure"))
             if not self.collision:
                 self.tile.rotate_order -= 1
         # Right
-        elif action == 2:
+        elif action == 1:
             self.tile.x += 1
             if not self.collision:
                 self.tile.x -= 1
         # Left
-        elif action == 3:
+        elif action == 2:
             self.tile.x -= 1
             if not self.collision:
                 self.tile.x += 1
+        # Down
+        # elif action == 3:
+        #     self.tile.y += 1
+        #     if not self.collision:
+        #         self.tile.y -= 1
+        #         self.tile.locked = True
+        #         for x, y, color in self.tile.pos_and_color:
+        #             self.tiles_grid[y][x] = color
+        #         self.check_game_over()
 
         self.clear_and_move_down()
 
@@ -120,19 +120,22 @@ class Tetris(object):
 
     @property
     def n_actions(self):
-        return 4
+        return 3
 
     @property
     def reward(self):
-        rows, holes, entropy, heights = self.info
-        return -0.51 * heights + 0.76 * rows - 0.36 * holes - 0.18 * entropy
+        rows, holes, bumpiness, heights = self.info
+        return  0.76 * rows - 0.36 * holes - 0.18 * bumpiness - 0.51 * heights
 
     @property
     def binary(self):
-        temp = self.tiles_grid[:]
+        temp = [[0 for _ in range(cols)] for _ in range(rows)]
         for x, y, color in self.tile.pos_and_color:
-            temp[y][x] = color
-        return [[[cell != (0,0,0) for cell in row] for row in temp]]
+            temp[y][x] = int((color != (0,0,0)))
+        for row in range(rows):
+            for col in range(cols):
+                temp[row][col] = int(self.tiles_grid[row][col] != (0,0,0))
+        return temp
 
     @property
     def window_array(self):
@@ -141,8 +144,8 @@ class Tetris(object):
     @property
     def info(self):
         """The model input. Represent current board's condition."""
-        entropy, heights = self.entropy_and_heights
-        return self.cleared_rows, self.holes, entropy, heights
+        bumpiness, heights = self.entropy_and_heights
+        return self.cleared_rows, self.holes, bumpiness, heights
 
     @property
     def entropy_and_heights(self):

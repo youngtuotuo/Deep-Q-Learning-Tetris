@@ -1,11 +1,12 @@
 from tetris.game import Tetris
-import numpy as np
+import torch
 
 
 def main():
     tetris = Tetris()
     while tetris.run:
         tetris.tile_fall()
+        print(torch.tensor(tetris.binary, dtype=torch.int8))
         tetris.key_down_detection()
         tetris.clear_and_move_down()
         tetris.display()
