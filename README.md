@@ -5,11 +5,12 @@
 </p>
 
 
-# Tried Combinations
+# Combinations
 
 | States      | Action Space | Tile Fall | Current Results |
 | ----------- | -----------  | --------- | --------- |
 | (cleared rows, holes, bumpiness, heights) | (up, down, right, left) | True | Fail |
+| (cleared rows, holes, bumpiness, heights) | (up, right, left) | False | Fail |
 | RGB frames   | (up, down, right, left) | True | Fail |
 | RGB frames   | (up, right, left) | True | Fail |
 | Binary grids   | (up, down, right, left) | True | Fail |
@@ -25,7 +26,7 @@
 ```bash
     $ python play.py
 ```
-Remember to change `fall_speed` in `tetris/constants.py` to higher number.
+Remember to change `fall_speed` in `tetris/constants.py` to higher number.<br>
 `n` get new tile<br>
 `r` reset whole game<br>
 `q`/`esc` quit game
@@ -33,15 +34,15 @@ Remember to change `fall_speed` in `tetris/constants.py` to higher number.
 
 # TODO
 
-[ ] Weighted heights
-[ ] Simplified action space
-[ ] 1 x cols Convolution
-[ ] DDQN
-[ ] Skip Frames
-[ ] More algorithm
+- [ ] Weighted heights
+- [ ] Simplified action space
+- [ ] 1 x cols Convolution
+- [ ] DDQN
+- [ ] Skip Frames
+- [ ] More algorithm
 
 
 # References
-[https://github.com/uvipen/Tetris-deep-Q-learning-pytorch](https://github.com/uvipen/Tetris-deep-Q-learning-pytorch)
-[https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/](https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/)
-[https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html](https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html):w
+[https://github.com/uvipen/Tetris-deep-Q-learning-pytorch](https://github.com/uvipen/Tetris-deep-Q-learning-pytorch)<br>
+[https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/](https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/)<br>
+[https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html](https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html)<br>
