@@ -435,4 +435,4 @@ dependencies:
   - zope=1.0=py39h06a4308_1
   - zope.interface=5.4.0=py39h7f8727e_0
   - zstd=1.5.2=ha4553b6_0
-prefix: /home/tuo/anaconda3
+prefix: ~/anaconda3
