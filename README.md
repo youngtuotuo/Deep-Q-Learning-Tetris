@@ -5,7 +5,7 @@
 </p>
 
 # Requirements
-conda env create -f ml.yml
+conda env create -f requirements.yml
 
 # Experimented Combinations
 
