@@ -4,8 +4,10 @@
     <img src="figures/record.gif" />
 </p>
 
+# Requirements
+conda env create -f ml.yml
 
-# Combinations
+# Experimented Combinations
 
 | States      | Action Space | Tile Fall | Current Results |
 | ----------- | -----------  | --------- | --------- |
@@ -16,6 +18,15 @@
 | Binary grids   | (up, down, right, left) | True | Fail |
 | Binary grids   | (up, right, left) | True | Fail |
 
+# Experimenting
+
+- [ ] Skip n-frames
+- [ ] Weighted heights
+- [ ] Simplified action space: (right, left, space)
+- [ ] cols x 1 Convolution
+- [ ] DDQN
+- [ ] Skip Frames
+- [ ] More algorithm
 
 # Train
 ```bash
@@ -30,16 +41,6 @@ Remember to change `fall_speed` in `tetris/constants.py` to higher number.<br>
 `n` get new tile<br>
 `r` reset whole game<br>
 `q`/`esc` quit game
-
-
-# TODO
-
-- [ ] Weighted heights
-- [ ] Simplified action space
-- [ ] 1 x cols Convolution
-- [ ] DDQN
-- [ ] Skip Frames
-- [ ] More algorithm
 
 
 # References
