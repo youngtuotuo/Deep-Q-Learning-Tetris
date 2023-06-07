@@ -17,7 +17,6 @@ plt.ion()
 
 
 def main(opt):
-
     if torch.cuda.is_available():
         torch.cuda.manual_seed(123)
     else:
@@ -34,7 +33,9 @@ def main(opt):
     env = Tetris()
     env.reset()
 
-    states = torch.tensor(env.binary, dtype=torch.float32, device=device)[None, None, :]
+    states = torch.tensor(env.binary, dtype=torch.float32, device=device)[
+        None, None, :
+    ]
     policy_net = DQN2D(states.shape[1], rows, cols, env.n_actions).to(device)
     target_net = DQN2D(states.shape[1], rows, cols, env.n_actions).to(device)
     target_net.load_state_dict(policy_net.state_dict())
@@ -68,7 +69,9 @@ def main(opt):
                     action = predictions.max(1)[1].view(1, 1)
             else:
                 action = torch.tensor(
-                    [[randrange(env.n_actions)]], device=device, dtype=torch.int64
+                    [[randrange(env.n_actions)]],
+                    device=device,
+                    dtype=torch.int64,
                 )
 
             reward, done = env.step(action.item())
@@ -78,9 +81,9 @@ def main(opt):
 
             if done:
                 env.reset()
-            next_states = torch.tensor(env.binary, dtype=torch.float32, device=device)[
-                None, None, :
-            ]
+            next_states = torch.tensor(
+                env.binary, dtype=torch.float32, device=device
+            )[None, None, :]
 
             # Store the transition in memory
             memory.push(states, action, next_states, reward)
@@ -99,13 +102,14 @@ def main(opt):
                 reward_batch = torch.cat(batch.reward)
 
                 with amp.autocast():
-
                     predictions = policy_net(states_batch)
                     action_batch.clamp_(0, 3)
                     state_action_values = predictions.gather(1, action_batch)
 
                     next_states_batch = torch.cat(batch.next_states)
-                    next_state_values = target_net(next_states_batch).max(1)[0].detach()
+                    next_state_values = (
+                        target_net(next_states_batch).max(1)[0].detach()
+                    )
 
                     # Compute the expected Q values
                     expected_state_action_values = (
@@ -179,7 +183,10 @@ if __name__ == "__main__":
     parser.add_argument("--epsilon_end", type=float, default=0.1)
     parser.add_argument("--target_update", type=float, default=20)
     parser.add_argument(
-        "--batch_size", type=int, default=1536, help="The number of images per batch"
+        "--batch_size",
+        type=int,
+        default=1536,
+        help="The number of images per batch",
     )
     parser.add_argument("--gamma", type=float, default=0.999)
 

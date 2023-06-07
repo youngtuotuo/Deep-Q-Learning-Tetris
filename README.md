@@ -5,7 +5,26 @@
 </p>
 
 # Requirements
-conda env create -f requirements.yml
+```bash
+$ mkdir venv
+$ python -m venv venv/
+$ pip install matplotlib numpy pygame
+$ pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+```
+
+# Train
+```bash
+    $ python main.py
+```
+
+# Play
+```bash
+    $ python play.py
+```
+Remember to change `fall_speed` in `tetris/constants.py` to higher number.<br>
+`n` get new tile<br>
+`r` reset whole game<br>
+`q`/`esc` quit game
 
 # Experimented Combinations
 
@@ -27,23 +46,3 @@ conda env create -f requirements.yml
 - [ ] DDQN
 - [ ] Skip Frames
 - [ ] More algorithm
-
-# Train
-```bash
-    $ python main.py
-```
-
-# Play
-```bash
-    $ python play.py
-```
-Remember to change `fall_speed` in `tetris/constants.py` to higher number.<br>
-`n` get new tile<br>
-`r` reset whole game<br>
-`q`/`esc` quit game
-
-
-# References
-[https://github.com/uvipen/Tetris-deep-Q-learning-pytorch](https://github.com/uvipen/Tetris-deep-Q-learning-pytorch)<br>
-[https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/](https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/)<br>
-[https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html](https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html)<br>

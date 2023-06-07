@@ -46,7 +46,7 @@ class Tetris(object):
         self.run = True
         self.pause = False
         self.font = pygame.font.Font(
-            "/home/tuo/.local/share/fonts/Hack Regular Nerd Font Complete.ttf", 25
+            "./src/FiraCodeNerdFont-Regular.ttf", 25
         )
 
         self.cleared_rows = 0
