@@ -8,6 +8,7 @@
 ```bash
 $ mkdir venv
 $ python -m venv venv/
+$ pip install setuptools wheel
 $ pip install matplotlib numpy pygame
 $ pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
 ```
