@@ -19,23 +19,22 @@ plt.ion()
 def main(opt):
     if torch.cuda.is_available():
         torch.cuda.manual_seed(123)
+        device = torch.device("cuda")
     else:
         torch.manual_seed(123)
+        device = torch.device("cpu")
 
     exp_folder = os.path.join(
-        os.getcwd(), f"exp-{datetime.datetime.now()}"[:-7].replace(" ", "-")
-    )
+        os.getcwd(), f"exp-{datetime.datetime.now()}"[:-7].replace(" ", "-"))
     os.mkdir(exp_folder)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     scaler = amp.GradScaler(enabled=(device.type != "cpu"))
+
     env = Tetris()
     env.reset()
 
-    states = torch.tensor(env.binary, dtype=torch.float32, device=device)[
-        None, None, :
-    ]
+    states = torch.tensor(env.binary, dtype=torch.float32,
+                          device=device)[None, None, :]
     policy_net = DQN2D(states.shape[1], rows, cols, env.n_actions).to(device)
     target_net = DQN2D(states.shape[1], rows, cols, env.n_actions).to(device)
     target_net.load_state_dict(policy_net.state_dict())
@@ -60,8 +59,8 @@ def main(opt):
             env.tile_fall()
             sample = random()
             eps_threshold = opt.epsilon_end + (
-                opt.epsilon_start - opt.epsilon_end
-            ) * math.exp(-1.0 * count_actions / opt.epsilon_decay)
+                opt.epsilon_start - opt.epsilon_end) * math.exp(
+                    -1.0 * count_actions / opt.epsilon_decay)
             count_actions += 1
             if sample > eps_threshold:
                 with torch.no_grad():
@@ -81,9 +80,9 @@ def main(opt):
 
             if done:
                 env.reset()
-            next_states = torch.tensor(
-                env.binary, dtype=torch.float32, device=device
-            )[None, None, :]
+            next_states = torch.tensor(env.binary,
+                                       dtype=torch.float32,
+                                       device=device)[None, None, :]
 
             # Store the transition in memory
             memory.push(states, action, next_states, reward)
@@ -108,13 +107,11 @@ def main(opt):
 
                     next_states_batch = torch.cat(batch.next_states)
                     next_state_values = (
-                        target_net(next_states_batch).max(1)[0].detach()
-                    )
+                        target_net(next_states_batch).max(1)[0].detach())
 
                     # Compute the expected Q values
-                    expected_state_action_values = (
-                        next_state_values * opt.gamma
-                    ) + reward_batch
+                    expected_state_action_values = (next_state_values *
+                                                    opt.gamma) + reward_batch
 
                     loss = criterion(
                         state_action_values.float(),
@@ -156,6 +153,7 @@ def main(opt):
                         f"Epoch: {epoch}, Avg Try: {avg_du:>6.2f}, Avg Loss: {avg_loss:>7.2f}, Avg Reward: {avg_reward:>6.2f}"
                     )
                     break
+
         # Update the target network, copying all weights and biases in DQN
         if epoch % opt.target_update == 0:
             target_net.load_state_dict(policy_net.state_dict())
